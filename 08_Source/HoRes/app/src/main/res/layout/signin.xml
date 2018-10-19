@@ -65,17 +65,16 @@
 
     <Button
         android:id="@+id/btnSignin"
-        android:layout_weight="1"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:text="SINGIN"
-        android:textSize="24sp"
-        android:textStyle="bold"
-        android:layout_marginTop="3dp"
-        android:background="#3cb7f4"
         android:layout_marginLeft="20dp"
         android:layout_marginRight="15dp"
-       />
+        android:layout_marginTop="3dp"
+        android:layout_weight="1"
+        android:background="#3cb7f4"
+        android:text="SIGNIN"
+        android:textSize="24sp"
+        android:textStyle="bold" />
 
     <TextView
         android:id="@+id/tvFogotPass"
