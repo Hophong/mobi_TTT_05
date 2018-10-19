@@ -37,6 +37,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
     ArrayList<User> arrayUser;
     EditText edtUsername;
     EditText edtPassword;
+<<<<<<< HEAD
     String url_getdata="http://192.168.1.58:8080/androidwebservice/getdata.php";*/
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,6 +53,19 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
         // Hiển thị Progress Bar
         myProgress.show();
 
+=======
+    String url_getdata = "http://192.168.1.58:8080/androidwebservice/getdata.php";
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.signin);
+        ReadJson(url_getdata);
+        btnSignin = (Button) findViewById(R.id.btnSignin);
+        edtUsername = (EditText) findViewById(R.id.edtUsername);
+        edtPassword = (EditText) findViewById(R.id.edtPassword);
+        arrayUser = new ArrayList<>();
+>>>>>>> master
         // ánh xạ map
         SupportMapFragment mapFragment
                 = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.fragmentmap);
@@ -76,33 +90,43 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
         /*btnSignin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String user=edtUsername.getText().toString();
-                String pass=edtPassword.getText().toString();
+                String user = edtUsername.getText().toString();
+                String pass = edtPassword.getText().toString();
                 int i;
+<<<<<<< HEAD
                 int size=arrayUser.size();
                 for(i=0;i<size;i++)
                 {
                     if(arrayUser.get(i).getUserName().equals(user) && arrayUser.get(i).getPassword().equals(pass))
                     {
+=======
+                int size = arrayUser.size();
+                for (i = 0; i < size; i++) {
+                    if (arrayUser.get(i).getUserName().equals(user) && arrayUser.get(i).getPassword().equals(pass)) {
+>>>>>>> master
                         Toast.makeText(MainActivity.this, "dang nhap thanh cong", Toast.LENGTH_SHORT).show();
                         break;
                     }
                 }
-                if(i==size) Toast.makeText(MainActivity.this, "sai", Toast.LENGTH_SHORT).show();
+                if (i == size) Toast.makeText(MainActivity.this, "sai", Toast.LENGTH_SHORT).show();
             }
         });*/
     }
+<<<<<<< HEAD
    /* private void ReadJson(String url)
     {
         RequestQueue requestqueue=Volley.newRequestQueue(this);
+=======
+    private void ReadJson(String url) {
+        RequestQueue requestqueue = Volley.newRequestQueue(this);
+>>>>>>> master
         JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, url, null,
                 new Response.Listener<JSONArray>() {
                     @Override
                     public void onResponse(JSONArray response) {
-                        for(int i=0;i<response.length();i++)
-                        {
+                        for (int i = 0; i < response.length(); i++) {
                             try {
-                                JSONObject object =response.getJSONObject(i);
+                                JSONObject object = response.getJSONObject(i);
                                 arrayUser.add(new User(
                                         object.getInt("Id"),
                                         object.getString("UserName"),
@@ -124,8 +148,14 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
                 }
         );
         requestqueue.add(jsonArrayRequest);
+<<<<<<< HEAD
     }*/
 
+=======
+    }
+
+    @Override
+>>>>>>> master
     public void onMapReady(GoogleMap googleMap) {
         // lấy đối tượng gg map ra
         map = googleMap;
@@ -210,6 +240,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED
                         && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
 
+<<<<<<< HEAD
                     Toast.makeText(this, "Permission granted!", Toast.LENGTH_LONG).show();
 
                     // Hiển thị vị trí hiện thời trên bản đồ.
@@ -329,4 +360,6 @@ public class MainActivity extends AppCompatActivity implements LocationListener,
     public void onProviderDisabled(String provider) {
 
     }
+=======
+>>>>>>> master
 }
