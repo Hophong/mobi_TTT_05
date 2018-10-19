@@ -34,16 +34,17 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     ArrayList<User> arrayUser;
     EditText edtUsername;
     EditText edtPassword;
-    String url_getdata="http://192.168.1.58:8080/androidwebservice/getdata.php";
+    String url_getdata = "http://192.168.1.58:8080/androidwebservice/getdata.php";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.signin);
         ReadJson(url_getdata);
-        btnSignin=(Button) findViewById(R.id.btnSignin);
-        edtUsername=(EditText) findViewById(R.id.edtUsername);
-        edtPassword=(EditText) findViewById(R.id.edtPassword);
-        arrayUser=new ArrayList<>();
+        btnSignin = (Button) findViewById(R.id.btnSignin);
+        edtUsername = (EditText) findViewById(R.id.edtUsername);
+        edtPassword = (EditText) findViewById(R.id.edtPassword);
+        arrayUser = new ArrayList<>();
         // ánh xạ map
         //MapFragment mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.fragmentmap);
         //mapFragment.getMapAsync(this);
@@ -51,33 +52,29 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         btnSignin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String user=edtUsername.getText().toString();
-                String pass=edtPassword.getText().toString();
+                String user = edtUsername.getText().toString();
+                String pass = edtPassword.getText().toString();
                 int i;
-                int size=arrayUser.size();
-                for(i=0;i<size;i++)
-                {
-                    if(arrayUser.get(i).getUserName()==user && arrayUser.get(i).getPassword()==pass)
-                    {
+                int size = arrayUser.size();
+                for (i = 0; i < size; i++) {
+                    if (arrayUser.get(i).getUserName().equals(user) && arrayUser.get(i).getPassword().equals(pass)) {
                         Toast.makeText(MainActivity.this, "dang nhap thanh cong", Toast.LENGTH_SHORT).show();
                         break;
                     }
                 }
-                if(i==size) Toast.makeText(MainActivity.this, "sai", Toast.LENGTH_SHORT).show();
+                if (i == size) Toast.makeText(MainActivity.this, "sai", Toast.LENGTH_SHORT).show();
             }
         });
     }
-    private void ReadJson(String url)
-    {
-        RequestQueue requestqueue=Volley.newRequestQueue(this);
+    private void ReadJson(String url) {
+        RequestQueue requestqueue = Volley.newRequestQueue(this);
         JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, url, null,
                 new Response.Listener<JSONArray>() {
                     @Override
                     public void onResponse(JSONArray response) {
-                        for(int i=0;i<response.length();i++)
-                        {
+                        for (int i = 0; i < response.length(); i++) {
                             try {
-                                JSONObject object =response.getJSONObject(i);
+                                JSONObject object = response.getJSONObject(i);
                                 arrayUser.add(new User(
                                         object.getInt("Id"),
                                         object.getString("UserName"),
@@ -100,6 +97,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         );
         requestqueue.add(jsonArrayRequest);
     }
+
     @Override
     public void onMapReady(GoogleMap googleMap) {
         map = googleMap;
@@ -121,8 +119,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
         map.setMyLocationEnabled(true);*/
     }
-
-
 
 
 }
