@@ -27,7 +27,7 @@
         />
 
     <EditText
-        android:id="@+id/edtUsername"
+        android:id="@+id/edtUsername_reg"
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:background="#fffefe"
@@ -43,7 +43,7 @@
         android:layout_marginTop="10dp" />
 
     <EditText
-        android:id="@+id/edtEmail"
+        android:id="@+id/edtEmail_reg"
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:background="#ffffff"
@@ -59,7 +59,7 @@
         android:layout_marginTop="10dp" />
 
     <EditText
-        android:id="@+id/edtPassword"
+        android:id="@+id/edtPassword_reg"
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:background="#ffffff"
@@ -75,7 +75,7 @@
         android:layout_marginTop="10dp"/>
 
     <EditText
-        android:id="@+id/edtphone"
+        android:id="@+id/edtphone_reg"
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:background="#ffffff"
@@ -83,6 +83,7 @@
         android:layout_marginRight="30dp"/>
 
     <Button
+        android:id="@+id/btnregiter"
         android:layout_width="wrap_content"
         android:layout_height="60dp"
         android:text="REGISTER"
