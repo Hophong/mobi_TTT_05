@@ -59,15 +59,17 @@ public class Signin extends Fragment {
                    String user=edtUsername.getText().toString();
                    String pass=edtPassword.getText().toString();
                    int i=0;
+                   int check=0;
                    int size=arrayUser.size();
                    for(i=0;i<size;i++)
                    {
                        if(arrayUser.get(i).getUserName().equals(user) && arrayUser.get(i).getPassword().equals(pass))
                        {
                            Toast.makeText(getActivity(), "dang nhap thanh cong", Toast.LENGTH_SHORT).show();
+                           check=1;
                        }
                    }
-                   if(i==size) Toast.makeText(getActivity(), "TÀI KHOẢN KHÔNG TỒN TẠI", Toast.LENGTH_SHORT).show();
+                   if(check==0) Toast.makeText(getActivity(), "TÀI KHOẢN KHÔNG TỒN TẠI", Toast.LENGTH_SHORT).show();
                }
 
         });
@@ -77,8 +79,12 @@ public class Signin extends Fragment {
         tvSignup.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Signup signup=new Signup();
                 FragmentTransaction ft= getFragmentManager().beginTransaction();
-                ft.replace(R.id.emptyLayout, new Signup());
+                Bundle bundle=new Bundle();
+                bundle.putCharSequenceArrayList("User", (ArrayList) arrayUser);
+                signup.setArguments(bundle);
+                ft.replace(R.id.emptyLayout, signup);
                 ft.commit();
             }
         });

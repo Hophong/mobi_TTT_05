@@ -63,5 +63,6 @@ public class MainActivity extends AppCompatActivity {
         FragmentTransaction ft= getSupportFragmentManager().beginTransaction();
         ft.add(R.id.emptyLayout, new Signin());
         ft.commit();
+
     }
 }

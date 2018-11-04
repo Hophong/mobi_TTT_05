@@ -20,6 +20,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -28,15 +29,19 @@ public class Signup extends Fragment{
 
     EditText edtUsernam_reg,edtEmail_reg,edtPassword_reg,edtPhone_reg;
     Button btnregiter;
-
+    ArrayList<User> arrayUser=new ArrayList<>();
     String url_insertdata="https://nqphu1998.000webhostapp.com/insertdata.php";
-
-
+    String emailPattern = "[a-zA-Z0-9._-]+@[a-z]+\\.+[a-z]+";
+    String phonePatten="^[+]*[(]{0,1}[0-9]{1,4}[)]{0,1}[-\\s\\./0-9]*$";
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         view =inflater.inflate(R.layout.signup,container,false);
-
+        Bundle bundle=getArguments();
+        if(bundle!=null)
+        {
+            arrayUser=(ArrayList) bundle.getCharSequenceArrayList("User");
+        }
         Anhxa();
 
          btnregiter.setOnClickListener(new View.OnClickListener() {
@@ -49,7 +54,19 @@ public class Signup extends Fragment{
 
                 if (user.isEmpty() || email.isEmpty() || pass.isEmpty() || phone.isEmpty()) {
                     Toast.makeText(getActivity(), "nhap lai", Toast.LENGTH_SHORT).show();
-                } else {
+                }
+                else if(email.matches(emailPattern)!=true) {
+                    Toast.makeText(getActivity(), "invalid email", Toast.LENGTH_SHORT).show();
+                }
+                else if (phone.matches(phonePatten)!=true)
+                {
+                    Toast.makeText(getActivity(), "invalid phone", Toast.LENGTH_SHORT).show();
+                }
+                else if(checkUserName_Email(user,email,arrayUser)!=true)
+                {
+                    Toast.makeText(getActivity(), "username or email da ton tai", Toast.LENGTH_SHORT).show();
+                }
+                else {
                     Insert(url_insertdata);
                 }
             }
@@ -58,7 +75,14 @@ public class Signup extends Fragment{
 
         return view;
     }
-
+    private  boolean checkUserName_Email(String UserName,String Email,ArrayList<User> users)
+    {
+        for (int i=0;i<users.size();i++)
+        {
+            if(users.get(i).getUserName().equals(UserName)||users.get(i).getEmail().equals(Email)) return false;
+        }
+        return true;
+    }
     private void Anhxa() {
         btnregiter      =   (Button) view.findViewById(R.id.btnregiter);
         edtUsernam_reg  =   (EditText) view.findViewById(R.id.edtUsername_reg);
