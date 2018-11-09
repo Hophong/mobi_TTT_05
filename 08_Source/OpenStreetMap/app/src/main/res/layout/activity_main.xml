@@ -1,38 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/linearlayout"
     android:orientation="vertical"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent">
 
-    <!--<AutoCompleteTextView-->
-        <!--android:id="@+id/autoTV"-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="wrap_content" />-->
-    <RelativeLayout
-        android:layout_width="match_parent"
+    <LinearLayout
         android:orientation="horizontal"
-        android:layout_margin="10dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content">
-        <AutoCompleteTextView
-            android:layout_width="match_parent"
-            android:id="@+id/autoTV"
-            android:layout_toLeftOf="@+id/btnPlace"
-            android:layout_marginRight="10sp"
-            android:layout_height="wrap_content" />
-        <!--<EditText-->
-            <!--android:id="@+id/edtPlace"-->
-            <!--android:layout_width="match_parent"-->
-            <!--android:layout_toLeftOf="@+id/btnPlace"-->
-            <!--android:layout_marginRight="10sp"-->
-            <!--android:layout_height="wrap_content" />-->
         <Button
-            android:id="@+id/btnPlace"
-            android:text="Search"
-            android:layout_alignParentRight="true"
+            android:onClick="callFunction"
+            android:text="search"
+            android:id="@+id/btnSearch"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
+        <Button
+            android:onClick="callFunction"
+            android:text="Routing"
+            android:id="@+id/btnRouting"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
 
-    </RelativeLayout>
+    <FrameLayout
+        android:id="@+id/fragmentContent"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"></FrameLayout>
 
     <org.osmdroid.views.MapView android:id="@+id/map"
         android:layout_width="fill_parent"

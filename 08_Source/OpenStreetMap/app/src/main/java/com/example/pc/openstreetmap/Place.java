@@ -9,6 +9,8 @@ import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.Marker;
 
+// Lưu thông tin cần thiết của một địa điểm và các thao tác
+
 public class Place {
     GeoPoint geoPoint;
     String name;

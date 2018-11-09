@@ -1,19 +1,29 @@
 package com.example.pc.openstreetmap;
 
+import android.app.Dialog;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.StrictMode;
 import android.preference.PreferenceManager;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import org.json.JSONArray;
@@ -41,21 +51,16 @@ import org.osmdroid.views.overlay.Marker.OnMarkerDragListener;
 public class MainActivity extends AppCompatActivity {
 
     MapView map = null;
-    Button btnPlace;
-    EditText edtPlace;
     String KEY = "87c22c26-36bd-468d-9223-61be31580373";    // Của Graphhooper : https://graphhopper.com/dashboard/#/documentation
-    String locale = "vi_VI";
+    String locale = "vi_VI";    // Khu vực tìm kiếm ở Việt Nam
     ArrayList<Place> places;    // Mảng các địa điểm khi tìm kiếm
-
-    AutoCompleteTextView autoTv;
-
-    // URL để tìm địa điểm
-    String urlGeocoding = "https://graphhopper.com/api/1/geocode?q=";
+    String urlGeocoding = "https://graphhopper.com/api/1/geocode?q=";   // URL để tìm địa điểm
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        // Sử dụng thư viện osmbonuspack
         Context ctx = getApplicationContext();
         org.osmdroid.config.Configuration.getInstance().load(ctx,PreferenceManager.getDefaultSharedPreferences(ctx));
 
@@ -69,45 +74,25 @@ public class MainActivity extends AppCompatActivity {
 
         anhXa();
 
+        // Thiết lập cơ bản cho map
         map.setTileSource(TileSourceFactory.MAPNIK);
         map.setBuiltInZoomControls(true);
         map.setMultiTouchControls(true);
-
         final IMapController mapController = map.getController();
         mapController.setZoom(15);
-        // startpoint : Đại học khoa học tự nhiên HCM
+        // Địa điểm mặc định startpoint : Đại học khoa học tự nhiên HCM
         GeoPoint startPoint = new GeoPoint(10.762367, 106.681307);
         mapController.setCenter(startPoint);
 
 
-        //0. Using the Marker overlay
-//        Marker startMarker = new Marker(map);
-//        startMarker.setPosition(startPoint);
-//        startMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
-//        startMarker.setDraggable(true);
-//        startMarker.setOnMarkerDragListener(new OnMarkerDragListenerDrawer());
-//        map.getOverlays().add(startMarker);
-//        startMarker.setTitle("Đại học Khoa học tự nhiên - DDHQG tp HCM");
+        // Add marker
+        Marker startMarker = new Marker(map);
+        startMarker.setPosition(startPoint);
+        startMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
+        map.getOverlays().add(startMarker);
+        startMarker.setTitle("Đại học Khoa học tự nhiên - DDHQG tp HCM");
 
-
-
-        //1. Tạo RoadManager để thao tác
-        //RoadManager roadManager = new GraphHopperRoadManager(KEY,true);
-
-        //2. Tìm đường từ startpoint đến endpoint
-        // OSM không cho tìm đường theo tên mà theo điểm
-
-//        ArrayList<GeoPoint> waypoints = new ArrayList<GeoPoint>();
-//        waypoints.add(startPoint);
-//        GeoPoint endPoint = new GeoPoint(10.773556, 106.659350);
-//        waypoints.add(endPoint);
-//
-//        Road road = roadManager.getRoad(waypoints);
-//        Polyline roadOverlay = RoadManager.buildRoadOverlay(road);
-//        map.getOverlays().add(roadOverlay);
-
-
-//        //5. Tìm cái địa điểm là "Hotel" ( tìm kiếm trong phạm vị hình vuông )
+//        //5. Tìm cái địa điểm là "Hotel" ( tìm kiếm trong phạm vị hình vuông ) quanh vị trí startpoint
 //        NominatimPOIProvider poiProvider = new NominatimPOIProvider("OsmNavigator/1.0");
 
           // Tham số thứ ba trong getPOICloseTo là khoảng cách so với startpoint ( đơn vị là độ)
@@ -130,23 +115,6 @@ public class MainActivity extends AppCompatActivity {
 ////            }
 //            poiMarkers.add(poiMarker);
 //        }
-//
-//
-//        map.invalidate();
-
-        // Geocoding: Tìm kiếm địa điểm theo tên
-
-        btnPlace.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Geocoding(autoTv.getText().toString());
-                if(!places.isEmpty()) {
-                    mapController.setCenter(places.get(0).geoPoint);
-                    mapController.setZoom(16);
-                }
-
-            }
-        });
 
         map.invalidate();
 
@@ -171,8 +139,10 @@ public class MainActivity extends AppCompatActivity {
         map.onPause();  //needed for compass, my location overlays, v6.0.0 and up
     }
 
-    public void Geocoding(String str){
+    // Trả về địa điểm đầu tiên trong mảng
+    public Place Geocoding(String str){
 
+        // URL theo khi tìm kiếm dựa trên Graphhoper
         String url = urlGeocoding + str + "&locale=" + locale + "&debug=true&key=" + KEY;
         // Lấy thông tin dạng JSON về
         String jString = BonusPackHelper.requestStringFromUrl(url);
@@ -189,13 +159,13 @@ public class MainActivity extends AppCompatActivity {
             JSONArray jsonArray = jsonObject.optJSONArray("hits");
             if(jsonArray == null || jsonArray.length() == 0){
                 Toast.makeText(this, "No place", Toast.LENGTH_SHORT).show();
-                return ;
+                return null;
             }
 
+            // Thêm các địa điểm vào mảng places
             for(int i = 0; i < jsonArray.length(); i++){
                 JSONObject jPlace = jsonArray.getJSONObject(i);
                 Place place = new Place(jPlace);
-                place.addMarker(map);
                 places.add(place);
 
             }
@@ -204,36 +174,115 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
 
         }
+        return places.get(0);
 
     }
 
-//    public void autocompleteTV(){
-//        autoArrayList.clear();
-//        autoArrayList = new ArrayList<String>();
-//        for(int i = 0; i < places.size();i++){
-//            Place place = places.get(i);
-//            String tmp = place.getName() + " - " + place.getStreet() + ", "+ place.getCity();
-//            autoArrayList.add(tmp);
-//        }
-//    }
-//
-//    public void searchPlace(){
-//
-//        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_dropdown_item_1line,
-//                autoArrayList);
-//        autoTv.setAdapter(arrayAdapter);
-//
-//        //while(!autoTv.getText().toString().equals("")){
-//            Geocoding(autoTv.getText().toString());
-//            arrayAdapter.notifyDataSetChanged();
-//        //}
-//
-//    }
-
     public void anhXa(){
         map = (MapView)findViewById(R.id.map);
-        btnPlace = (Button)findViewById(R.id.btnPlace);
-        autoTv = (AutoCompleteTextView)findViewById(R.id.autoTV);
-        //edtPlace = (EditText)findViewById(R.id.edtPlace) ;
+    }
+
+    // Bắt sự kiện cho 2 button Search và Routing
+    public void callFunction(View view){
+//        final FragmentManager fragmentManager = getSupportFragmentManager();
+//        final FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+//        Fragment fragment = null;
+        switch (view.getId()){
+            case R.id.btnSearch: searchPlace();
+            break;
+            case R.id.btnRouting: routing();
+            break;
+        }
+//        fragmentTransaction.replace(R.id.fragmentContent,fragment);
+//        fragmentTransaction.commit();
+    }
+
+    public void searchPlace(){
+        // Không thể thao tác trên các edittext, button,... của layout khác nên sẽ tạo Dialog
+        final Dialog dialogSeracch = new Dialog(this);
+        dialogSeracch.setContentView(R.layout.search);
+        dialogSeracch.setTitle("Tìm địa điểm");
+        dialogSeracch.show();
+        final EditText autoTv = (EditText)dialogSeracch.findViewById(R.id.autoTV);
+        Button btnPlace = (Button)dialogSeracch.findViewById(R.id.btnPlace);
+
+        btnPlace.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Geocoding(autoTv.getText().toString());
+
+                // Thêm các Marker vào mỗi địa điểm tìm được
+                for(int i=0;i<places.size();i++){
+                    places.get(i).addMarker(map);
+                }
+
+                // Nếu tìm được thì đưa Camera vào địa điểm đầu tiên trong mảng
+                if(!places.isEmpty()) {
+                    map.getController().setCenter(places.get(0).geoPoint);
+                    map.getController().setZoom(16);
+                }
+                // tắt dialog
+                dialogSeracch.dismiss();
+            }
+        });
+    }
+
+    public void routing(){
+
+        final Dialog dialogRouting = new Dialog(this);
+        dialogRouting.setContentView(R.layout.routing);
+        dialogRouting.setTitle("Tìm đường đi");
+        dialogRouting.show();
+
+        final TextView tvDuration = (TextView)dialogRouting.findViewById(R.id.tvDuration);
+        final TextView tvDistance = (TextView)dialogRouting.findViewById(R.id.tvDistance);
+
+        final AutoCompleteTextView startPlace = (AutoCompleteTextView)dialogRouting.findViewById(R.id.start);
+        final AutoCompleteTextView endPlace = (AutoCompleteTextView)dialogRouting.findViewById(R.id.end);
+        Button btnFindpath = (Button)dialogRouting.findViewById(R.id.btnFindpath);
+
+        btnFindpath.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Chuyển từ tên thành tọa độ
+                // Lấy cặp tọa độ đầu tiên trong mảng tọa độ của mỗi địa điểm
+                Place sPlace = Geocoding(startPlace.getText().toString());
+                Place ePlace = Geocoding(endPlace.getText().toString());
+
+                //1. Tạo RoadManager để thao tác
+                RoadManager roadManager = new GraphHopperRoadManager(KEY,true);
+
+                //2. Tìm đường từ startpoint đến endpoint
+                //OSM không cho tìm đường theo tên mà theo tọa độ
+                ArrayList<GeoPoint> waypoints = new ArrayList<GeoPoint>();
+                waypoints.add(sPlace.geoPoint);
+                waypoints.add(ePlace.geoPoint);
+
+                // Tìm kiếm đường đi
+                Road road = roadManager.getRoad(waypoints);
+                // Tạo các đường Polyline từ đường đi
+                Polyline roadOverlay = RoadManager.buildRoadOverlay(road);
+                // Vẽ Polyline lên map
+                map.getOverlays().add(roadOverlay);
+
+                // Thêm Marker địa điểm bắt đầu và kết thúc
+                sPlace.addMarker(map);
+                ePlace.addMarker(map);
+
+                // Đưa camera về địa điểm bắt đầu
+                map.getController().setCenter(sPlace.geoPoint);
+
+                tvDistance.setText(String.format("%.2f",road.mLength));   // km
+                tvDuration.setText(String.format("%.1f",road.mDuration)); // s
+
+                //
+                Toast.makeText(MainActivity.this, tvDistance.getText() + " km" + " - " + tvDuration.getText() +" s" , Toast.LENGTH_LONG).show();
+                // Tắt dialog
+                dialogRouting.dismiss();
+
+
+                }
+        });
+
     }
 }
