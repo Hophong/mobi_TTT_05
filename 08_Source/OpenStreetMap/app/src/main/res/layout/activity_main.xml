@@ -1,26 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/linearlayout"
-    android:orientation="vertical"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent">
+    android:layout_height="fill_parent"
+    android:orientation="vertical">
 
     <LinearLayout
-        android:orientation="horizontal"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
         <Button
-            android:onClick="callFunction"
-            android:text="search"
             android:id="@+id/btnSearch"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-        <Button
+            android:layout_height="wrap_content"
             android:onClick="callFunction"
-            android:text="Routing"
+            android:text="search" />
+
+        <Button
             android:id="@+id/btnRouting"
             android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="callFunction"
+            android:text="Routing" />
+
+        <Button
+            android:id="@+id/btnMyLocation"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="callFunction"
+            android:text="My Location" />
+
+        <Button
+            android:onClick="callFunction"
+            android:id="@+id/btnHoRes"
+            android:text="HoRes"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
+
     </LinearLayout>
 
     <FrameLayout
@@ -28,7 +45,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"></FrameLayout>
 
-    <org.osmdroid.views.MapView android:id="@+id/map"
+    <org.osmdroid.views.MapView
+        android:id="@+id/map"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent" />
 </LinearLayout>
