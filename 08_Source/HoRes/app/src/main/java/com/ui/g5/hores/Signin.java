@@ -1,6 +1,7 @@
 package com.ui.g5.hores;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -67,6 +68,14 @@ public class Signin extends Fragment {
                        {
                            Toast.makeText(getActivity(), "dang nhap thanh cong", Toast.LENGTH_SHORT).show();
                            check=1;
+                           Intent intent=new Intent(getActivity(),main_screen.class);
+                            intent.putExtra("username",user);
+                            String email=arrayUser.get(i).getEmail().toString();
+                           intent.putExtra("email",email);
+
+
+
+                           startActivity(intent);
                        }
                    }
                    if(check==0) Toast.makeText(getActivity(), "TÀI KHOẢN KHÔNG TỒN TẠI", Toast.LENGTH_SHORT).show();
@@ -114,7 +123,7 @@ public class Signin extends Fragment {
 
 
 
-    private void ReadJson(String url)
+    public void ReadJson(String url)
     {
         RequestQueue requestqueue=Volley.newRequestQueue(getActivity());
 
