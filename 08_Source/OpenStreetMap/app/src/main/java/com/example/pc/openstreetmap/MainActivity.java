@@ -6,9 +6,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.ColorFilter;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.AsyncTask;
 import android.os.StrictMode;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
@@ -16,6 +18,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.res.ResourcesCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -38,25 +41,31 @@ import org.json.JSONObject;
 import org.osmdroid.api.IMapController;
 import org.osmdroid.bonuspack.location.NominatimPOIProvider;
 import org.osmdroid.bonuspack.location.POI;
+import org.osmdroid.bonuspack.overlays.GroundOverlay;
 import org.osmdroid.bonuspack.routing.GraphHopperRoadManager;
 import org.osmdroid.bonuspack.routing.OSRMRoadManager;
 import org.osmdroid.bonuspack.routing.Road;
 import org.osmdroid.bonuspack.routing.RoadManager;
 import org.osmdroid.bonuspack.routing.RoadNode;
 import org.osmdroid.bonuspack.utils.BonusPackHelper;
+import org.osmdroid.events.MapEventsReceiver;
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.FolderOverlay;
+import org.osmdroid.views.overlay.MapEventsOverlay;
 import org.osmdroid.views.overlay.Marker;
+import org.osmdroid.views.overlay.Polygon;
 import org.osmdroid.views.overlay.Polyline;
 
 import java.util.ArrayList;
 
 import org.osmdroid.views.overlay.Marker.OnMarkerDragListener;
+import org.osmdroid.views.overlay.infowindow.BasicInfoWindow;
+import org.osmdroid.views.overlay.infowindow.InfoWindow;
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements MapEventsReceiver{
 
     MapView map = null;
     String KEY = "87c22c26-36bd-468d-9223-61be31580373";    // Graphhooper : https://graphhopper.com/dashboard/#/documentation
@@ -105,8 +114,72 @@ public class MainActivity extends AppCompatActivity {
         map.getOverlays().add(startMarker);
         startMarker.setTitle("Đại học Khoa học tự nhiên - ĐHQG tp HCM");
 
+        // Khi touch vao mot vi tri tren ban do
+        MapEventsOverlay mapEventsOverlay = new MapEventsOverlay(this);
+        map.getOverlays().add(0, mapEventsOverlay); //inserted at the "bottom" of all overlays
+
         map.invalidate();
 
+    }
+
+    // Siggle tap
+    @Override
+    public boolean singleTapConfirmedHelper(GeoPoint p) {
+        //Toast.makeText(this, "Tapped", Toast.LENGTH_SHORT).show();
+        //map.getOverlays().clear();
+        Place place = reverseGeocoding(p);
+        place.addMarker(map);
+        map.invalidate();
+        //InfoWindow.closeAllInfoWindowsOn(map);
+        return true;
+    }
+
+    // Long press
+    @Override
+    public boolean longPressHelper(GeoPoint p) {
+        //Toast.makeText(this, "Long press", Toast.LENGTH_SHORT).show();
+        //17. Using Polygon, defined as a circle:
+        Polygon circle = new Polygon();
+        circle.setPoints(Polygon.pointsAsCircle(p, 2000.0));
+        circle.setFillColor(0x12121212);
+        circle.setStrokeColor(Color.RED);
+        circle.setStrokeWidth(2);
+        map.getOverlays().add(circle);
+        circle.setInfoWindow(new BasicInfoWindow(org.osmdroid.bonuspack.R.layout.bonuspack_bubble, map));
+        circle.setTitle("Centered on " + p.getLatitude() + "," + p.getLongitude());
+
+        //18. Using GroundOverlay
+        GroundOverlay myGroundOverlay = new GroundOverlay();
+        myGroundOverlay.setPosition(p);
+        Drawable d = ResourcesCompat.getDrawable(getResources(), R.drawable.ic_launcher, null);
+        myGroundOverlay.setImage(d.mutate());
+        myGroundOverlay.setDimensions(20.0f);
+        //myGroundOverlay.setTransparency(0.25f);
+//        myGroundOverlay.setBearing(mGroundOverlayBearing);
+//        mGroundOverlayBearing += 20.0f;
+        map.getOverlays().add(myGroundOverlay);
+
+		/*
+		Drawable d = ResourcesCompat.getDrawable(getResources(), R.drawable.bonuspack_bubble_black, null);
+		myGroundOverlay.setImage(d.mutate());
+		BoundingBox bb = new BoundingBox(p.getLatitude()+map.getLatitudeSpanDouble()/2,
+				p.getLongitude()+map.getLongitudeSpanDouble()/2,
+				p.getLatitude(),
+				p.getLongitude());
+		myGroundOverlay.setPositionFromBounds(bb);
+		map.getOverlays().add(myGroundOverlay);
+		Marker ne = new Marker(map);
+		ne.setPosition(new GeoPoint(bb.getLatNorth(), bb.getLonEast()));
+		ne.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
+		map.getOverlays().add(ne);
+		Marker sw = new Marker(map);
+		sw.setPosition(new GeoPoint(bb.getLatSouth(), bb.getLonWest()));
+		sw.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
+		map.getOverlays().add(sw);
+		*/
+
+        map.invalidate();
+        return true;
     }
 
     public void onResume() {
@@ -181,7 +254,9 @@ public class MainActivity extends AppCompatActivity {
                 routing();
                 break;
             case R.id.btnMyLocation:
-               myLocation();
+                //new locatingAsync(this).execute();
+                myLocation();
+
                 break;
             case R.id.btnHoRes:
                 searchHotelnRestaurant();
@@ -206,7 +281,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Geocoding(autoTv.getText().toString());
-
+                //new searchAsync(this).execute(autoTv.getText().toString());
 
                 // Thêm các Marker vào mỗi địa điểm tìm được
                 for (int i = 0; i < places.size(); i++) {
@@ -329,11 +404,13 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(this, "No place", Toast.LENGTH_SHORT).show();
                 return null;
             }
-            for (int i = 0; i < jsonArray.length(); i++) {
-                JSONObject jPlace = jsonArray.getJSONObject(i);
-                place = new Place(jPlace);
-
-            }
+            JSONObject jPlace = jsonArray.getJSONObject(0);
+            place = new Place(jPlace);
+//            for (int i = 0; i < jsonArray.length(); i++) {
+//                JSONObject jPlace = jsonArray.getJSONObject(i);
+//                place = new Place(jPlace);
+//
+//            }
         }catch (JSONException e){
 
         }
@@ -379,6 +456,140 @@ public class MainActivity extends AppCompatActivity {
 //                poiItem.setImage(new BitmapDrawable(poi.mThumbnail));
 //            }
             poiMarkers.add(poiMarker);
+        }
+    }
+
+    private class locatingAsync extends AsyncTask<Void,Void,Void> {
+        private ProgressDialog dialog;
+
+        public locatingAsync(MainActivity activity) {
+            dialog = new ProgressDialog(activity);
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            map.getOverlays().clear();
+            dialog.setMessage("Loading...");
+            dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+            dialog.show();
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+//            map.getOverlays().add(myLocationNewOverlay);
+//            map.getController().setZoom(15);
+//            map.getController().animateTo(myPoint);
+//            map.invalidate();
+            myLocationNewOverlay = new MyLocationNewOverlay(map);
+            myLocationNewOverlay.disableMyLocation();
+            myLocationNewOverlay.disableFollowLocation();
+
+            myLocationNewOverlay.enableMyLocation();
+            // map.getOverlays().clear();
+            map.getOverlays().add(myLocationNewOverlay);
+            myLocationNewOverlay.enableFollowLocation();
+            myLocationNewOverlay.setDrawAccuracyEnabled(true);
+
+            myLocationNewOverlay.runOnFirstFix(new Runnable() {
+                public void run() {
+                    try {
+                        myPoint = myLocationNewOverlay.getMyLocation();
+                        map.getController().setZoom(15);
+                        map.getController().animateTo(myPoint);
+
+                    } catch (Exception e) {
+
+                    }
+                }
+            });
+            if (dialog.isShowing())
+                dialog.dismiss();
+        }
+
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+//            myLocationNewOverlay = new MyLocationNewOverlay(map);
+//            myLocationNewOverlay.disableMyLocation();
+//            myLocationNewOverlay.disableFollowLocation();
+//
+//            myLocationNewOverlay.enableMyLocation();
+//            //map.getOverlays().clear();
+//            //map.getOverlays().add(myLocationNewOverlay);
+//            myLocationNewOverlay.enableFollowLocation();
+//            myLocationNewOverlay.setDrawAccuracyEnabled(true);
+//
+//            myLocationNewOverlay.runOnFirstFix(new Runnable() {
+//                public void run() {
+//                    try {
+//                        myPoint = myLocationNewOverlay.getMyLocation();
+//                        //.getController().setZoom(15);
+//                        //map.getController().animateTo(myPoint);
+//
+//                    } catch (Exception e) {
+//
+//                    }
+//                }
+//            });
+//            //map.invalidate();
+//            return null;
+//        }
+            return  null;
+        }
+    }
+
+    private class searchAsync extends AsyncTask<String,Void,Void>{
+        private ProgressDialog dialog;
+        String jString;
+        public searchAsync(MainActivity activity) {
+            dialog = new ProgressDialog(activity);
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            map.getOverlays().clear();
+            if (places != null) {
+                places.clear();
+            }
+
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            try {
+                JSONObject jsonObject = new JSONObject(jString);
+                JSONArray jsonArray = jsonObject.optJSONArray("hits");
+                if (jsonArray == null || jsonArray.length() == 0) {
+                    //Toast.makeText(this, "No place", Toast.LENGTH_SHORT).show();
+                    //return null;
+                }
+
+                // Thêm các địa điểm vào mảng places
+                for (int i = 0; i < jsonArray.length(); i++) {
+                    JSONObject jPlace = jsonArray.getJSONObject(i);
+                    Place place = new Place(jPlace);
+                    places.add(place);
+
+                }
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+
+            }
+            return ;
+        }
+
+        @Override
+        protected Void doInBackground(String... voids) {
+            // URL theo khi tìm kiếm dựa trên Graphhoper
+            String url = urlGeocoding + voids + "&locale=" + locale + "&debug=true&key=" + KEY;
+            // Lấy thông tin dạng JSON về
+            jString = BonusPackHelper.requestStringFromUrl(url);
+            return null;
         }
     }
 
