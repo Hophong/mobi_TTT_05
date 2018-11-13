@@ -1,5 +1,6 @@
 package com.ui.g5.hores;
 
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
@@ -29,6 +30,9 @@ public class main_screen extends AppCompatActivity {
 
 
     ImageView btnmenu;
+
+    FloatingActionButton location, floatBtn;
+
     String url_getdata = "https://nqphu1998.000webhostapp.com/getdata.php";
     ArrayList<User> arrayList;
     String user="",email="";
@@ -36,7 +40,9 @@ public class main_screen extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-
+        location = (FloatingActionButton)findViewById(R.id.locateBtn);
+        floatBtn = (FloatingActionButton)findViewById(R.id.floatingBtn);
+        btnmenu=(ImageView) findViewById(R.id.btnmenu);
 
         setContentView(R.layout.activity_main_screen);
         Bundle bundle = getIntent().getExtras();
@@ -47,13 +53,22 @@ public class main_screen extends AppCompatActivity {
 
         }
 
-        btnmenu=(ImageView) findViewById(R.id.btnmenu);
+
         btnmenu.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 showmenu();
             }
         });
+
+        location.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // to do
+            }
+        });
+
+        
     }
 
 

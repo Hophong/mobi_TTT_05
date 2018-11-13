@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<android.support.design.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -20,19 +21,9 @@
             android:layout_alignParentTop="true"
             android:src="@drawable/hambuger" />
 
-        <EditText
-            android:id="@+id/autoTV"
-            android:layout_width="200dp"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="10dp"
-            android:layout_marginRight="10sp"
-            android:layout_toLeftOf="@+id/btnPlace"
-            android:layout_toRightOf="@+id/btnmenu"
-            android:hint="Địa điểm cần tìm" />
-
         <Button
 
-            android:id="@+id/btnPlace"
+            android:id="@+id/btnSearch"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
@@ -41,4 +32,24 @@
 
     </RelativeLayout>
 
-</LinearLayout>
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/floatingBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/mobile"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="15dp"
+        android:backgroundTint="#fdfde8"
+        />
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/locateBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="right"
+        android:layout_marginRight="15dp"
+        android:layout_marginTop="80dp"
+        android:backgroundTint="#fdfde8"
+        android:src="@drawable/fb" />
+
+</android.support.design.widget.CoordinatorLayout>
