@@ -6,7 +6,7 @@
     android:weightSum="10"
     android:padding="3dp"
     android:orientation="vertical"
-
+    android:background="@drawable/background3"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <ImageView

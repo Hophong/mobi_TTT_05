@@ -1,5 +1,6 @@
 package com.ui.g5.hores;
 
+<<<<<<< HEAD
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.Dialog;
@@ -11,6 +12,8 @@ import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.StrictMode;
 import android.preference.PreferenceManager;
+=======
+>>>>>>> master
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -59,6 +62,9 @@ public class main_screen extends AppCompatActivity implements MapEventsReceiver{
 
 
     ImageView btnmenu;
+
+    FloatingActionButton location, floatBtn;
+
     String url_getdata = "https://nqphu1998.000webhostapp.com/getdata.php";
     ArrayList<User> arrayList;
     String user="",email="";
@@ -79,9 +85,15 @@ public class main_screen extends AppCompatActivity implements MapEventsReceiver{
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+<<<<<<< HEAD
         // Sử dụng Mapview của osmdroid
         Context ctx = getApplicationContext();
         org.osmdroid.config.Configuration.getInstance().load(ctx, PreferenceManager.getDefaultSharedPreferences(ctx));
+=======
+        location = (FloatingActionButton)findViewById(R.id.locateBtn);
+        floatBtn = (FloatingActionButton)findViewById(R.id.floatingBtn);
+        btnmenu=(ImageView) findViewById(R.id.btnmenu);
+>>>>>>> master
 
         setContentView(R.layout.activity_main_screen);
         Bundle bundle = getIntent().getExtras();
@@ -92,7 +104,7 @@ public class main_screen extends AppCompatActivity implements MapEventsReceiver{
 
         }
 
-        btnmenu=(ImageView) findViewById(R.id.btnmenu);
+
         btnmenu.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -100,6 +112,7 @@ public class main_screen extends AppCompatActivity implements MapEventsReceiver{
             }
         });
 
+<<<<<<< HEAD
         // Điều kiện để dùng thư viện osmbonuspack
         if (android.os.Build.VERSION.SDK_INT > 9) {
             StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
@@ -157,6 +170,16 @@ public class main_screen extends AppCompatActivity implements MapEventsReceiver{
             }
         });
 
+=======
+        location.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // to do
+            }
+        });
+
+        
+>>>>>>> master
     }
 
     private void ShowFloatingBtn() {

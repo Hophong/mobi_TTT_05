@@ -1,5 +1,6 @@
 package com.ui.g5.hores;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -10,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
@@ -28,6 +30,7 @@ public class Signup extends Fragment{
     View view;
 
     EditText edtUsernam_reg,edtEmail_reg,edtPassword_reg,edtPhone_reg;
+    TextView tvsignin;
     Button btnregiter;
     ArrayList<User> arrayUser=new ArrayList<>();
     String url_insertdata="https://nqphu1998.000webhostapp.com/insertdata.php";
@@ -72,6 +75,19 @@ public class Signup extends Fragment{
             }
         });
 
+         tvsignin.setOnClickListener(new View.OnClickListener() {
+             @Override
+             public void onClick(View v) {
+                 //Intent intent=new Intent(getActivity(),Signin.class);
+                 //startActivity(intent);
+
+                 Signin signin=new Signin();
+                 FragmentTransaction ft= getFragmentManager().beginTransaction();
+                 ft.replace(R.id.emptyLayout, signin);
+                 ft.commit();
+             }
+         });
+
 
         return view;
     }
@@ -89,6 +105,7 @@ public class Signup extends Fragment{
         edtEmail_reg    =   (EditText) view.findViewById(R.id.edtEmail_reg);
         edtPassword_reg =   (EditText) view.findViewById((R.id.edtPassword_reg));
         edtPhone_reg    =   (EditText) view.findViewById((R.id.edtphone_reg));
+        tvsignin      =   (TextView) view.findViewById(R.id.signin);
     }
 
     private void Insert(String url)
