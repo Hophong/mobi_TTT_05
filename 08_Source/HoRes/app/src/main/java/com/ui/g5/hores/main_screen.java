@@ -6,6 +6,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.Toast;
 
@@ -15,6 +16,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.Volley;
+import com.google.android.gms.maps.MapView;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -22,14 +24,20 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 
+
 public class main_screen extends AppCompatActivity {
-    Button btnmenu;
+
+
+    ImageView btnmenu;
     String url_getdata = "https://nqphu1998.000webhostapp.com/getdata.php";
     ArrayList<User> arrayList;
     String user="",email="";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+
+
         setContentView(R.layout.activity_main_screen);
         Bundle bundle = getIntent().getExtras();
         if(bundle.getString("username")!= null)
@@ -39,11 +47,10 @@ public class main_screen extends AppCompatActivity {
 
         }
 
-        btnmenu=(Button) findViewById(R.id.btnmenu);
+        btnmenu=(ImageView) findViewById(R.id.btnmenu);
         btnmenu.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
                 showmenu();
             }
         });

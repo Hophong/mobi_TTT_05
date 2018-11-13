@@ -72,9 +72,6 @@ public class Signin extends Fragment {
                             intent.putExtra("username",user);
                             String email=arrayUser.get(i).getEmail().toString();
                            intent.putExtra("email",email);
-
-
-
                            startActivity(intent);
                        }
                    }
