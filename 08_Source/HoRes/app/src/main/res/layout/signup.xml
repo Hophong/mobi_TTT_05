@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:orientation="vertical"
     android:weightSum="10"
-    android:background="@drawable/background"
+    android:background="@drawable/background3"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
  <LinearLayout
@@ -18,12 +18,13 @@
   <TextView
       android:layout_width="match_parent"
       android:layout_height="match_parent"
-      android:text="Register"
       android:layout_gravity="center"
-      android:textSize="35sp"
-      android:textStyle="bold"
-      android:textColor="#00ffea"
-      android:gravity="center"/>
+      android:fontFamily="@font/aclonica"
+      android:gravity="center"
+      android:text="Register"
+      android:textColor="@android:color/holo_red_dark"
+      android:textSize="45sp"
+      android:textStyle="bold" />
 
  </LinearLayout>
 
@@ -55,7 +56,7 @@
       android:layout_marginLeft="30dp"
       android:layout_marginRight="30dp"
       android:layout_weight="0.8"
-      android:background="#ead6d6" />
+      android:background="#f9f0f0" />
 
   <TextView
       android:layout_width="wrap_content"
@@ -74,7 +75,7 @@
       android:layout_marginLeft="30dp"
       android:layout_marginRight="30dp"
       android:layout_weight="0.8"
-      android:background="#ead6d6" />
+      android:background="#f9f0f0" />
 
   <TextView
       android:layout_width="wrap_content"
@@ -93,7 +94,7 @@
       android:layout_marginLeft="30dp"
       android:layout_marginRight="30dp"
       android:layout_weight="0.8"
-      android:background="#ead6d6" />
+      android:background="#f9f0f0" />
 
   <TextView
       android:layout_width="wrap_content"
@@ -112,7 +113,7 @@
       android:layout_marginLeft="30dp"
       android:layout_marginRight="30dp"
       android:layout_weight="0.8"
-      android:background="#ead6d6" />
+      android:background="#f9f0f0" />
 
   <Button
       android:id="@+id/btnregiter"
@@ -135,6 +136,7 @@
      android:layout_weight="1">
 
     <TextView
+        android:id="@+id/signin"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:text="Have already an Account? Signin"

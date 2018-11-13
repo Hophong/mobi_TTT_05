@@ -18,6 +18,9 @@
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/map_api_key" />
+        <meta-data
+            android:name="preloaded_fonts"
+            android:resource="@array/preloaded_fonts" />
 
         <activity android:name=".MainActivity">
             <intent-filter>
@@ -28,6 +31,7 @@
         </activity>
 
         <activity android:name=".main_screen"></activity>
+        <activity android:name=".Signin"></activity>
 
     </application>
 
