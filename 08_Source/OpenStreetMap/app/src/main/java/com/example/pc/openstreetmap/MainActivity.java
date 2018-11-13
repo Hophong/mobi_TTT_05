@@ -1,5 +1,6 @@
 package com.example.pc.openstreetmap;
 
+import android.app.Activity;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -55,6 +56,7 @@ import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.FolderOverlay;
 import org.osmdroid.views.overlay.MapEventsOverlay;
 import org.osmdroid.views.overlay.Marker;
+import org.osmdroid.views.overlay.Overlay;
 import org.osmdroid.views.overlay.Polygon;
 import org.osmdroid.views.overlay.Polyline;
 
@@ -76,7 +78,6 @@ public class MainActivity extends AppCompatActivity implements MapEventsReceiver
     String urlReverseGeocoding = "https://graphhopper.com/api/1/geocode?&reverse=true&point=";
     GeoPoint myPoint;  // Toa do cua nguoi dung
 
-    ProgressDialog progressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -118,67 +119,20 @@ public class MainActivity extends AppCompatActivity implements MapEventsReceiver
         MapEventsOverlay mapEventsOverlay = new MapEventsOverlay(this);
         map.getOverlays().add(0, mapEventsOverlay); //inserted at the "bottom" of all overlays
 
-        map.invalidate();
-
     }
 
     // Siggle tap
     @Override
     public boolean singleTapConfirmedHelper(GeoPoint p) {
-        //Toast.makeText(this, "Tapped", Toast.LENGTH_SHORT).show();
-        //map.getOverlays().clear();
         Place place = reverseGeocoding(p);
         place.addMarker(map);
         map.invalidate();
-        //InfoWindow.closeAllInfoWindowsOn(map);
         return true;
     }
 
     // Long press
     @Override
     public boolean longPressHelper(GeoPoint p) {
-        //Toast.makeText(this, "Long press", Toast.LENGTH_SHORT).show();
-        //17. Using Polygon, defined as a circle:
-        Polygon circle = new Polygon();
-        circle.setPoints(Polygon.pointsAsCircle(p, 2000.0));
-        circle.setFillColor(0x12121212);
-        circle.setStrokeColor(Color.RED);
-        circle.setStrokeWidth(2);
-        map.getOverlays().add(circle);
-        circle.setInfoWindow(new BasicInfoWindow(org.osmdroid.bonuspack.R.layout.bonuspack_bubble, map));
-        circle.setTitle("Centered on " + p.getLatitude() + "," + p.getLongitude());
-
-        //18. Using GroundOverlay
-        GroundOverlay myGroundOverlay = new GroundOverlay();
-        myGroundOverlay.setPosition(p);
-        Drawable d = ResourcesCompat.getDrawable(getResources(), R.drawable.ic_launcher, null);
-        myGroundOverlay.setImage(d.mutate());
-        myGroundOverlay.setDimensions(20.0f);
-        //myGroundOverlay.setTransparency(0.25f);
-//        myGroundOverlay.setBearing(mGroundOverlayBearing);
-//        mGroundOverlayBearing += 20.0f;
-        map.getOverlays().add(myGroundOverlay);
-
-		/*
-		Drawable d = ResourcesCompat.getDrawable(getResources(), R.drawable.bonuspack_bubble_black, null);
-		myGroundOverlay.setImage(d.mutate());
-		BoundingBox bb = new BoundingBox(p.getLatitude()+map.getLatitudeSpanDouble()/2,
-				p.getLongitude()+map.getLongitudeSpanDouble()/2,
-				p.getLatitude(),
-				p.getLongitude());
-		myGroundOverlay.setPositionFromBounds(bb);
-		map.getOverlays().add(myGroundOverlay);
-		Marker ne = new Marker(map);
-		ne.setPosition(new GeoPoint(bb.getLatNorth(), bb.getLonEast()));
-		ne.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
-		map.getOverlays().add(ne);
-		Marker sw = new Marker(map);
-		sw.setPosition(new GeoPoint(bb.getLatSouth(), bb.getLonWest()));
-		sw.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
-		map.getOverlays().add(sw);
-		*/
-
-        map.invalidate();
         return true;
     }
 
@@ -251,12 +205,11 @@ public class MainActivity extends AppCompatActivity implements MapEventsReceiver
                 searchPlace();
                 break;
             case R.id.btnRouting:
+
                 routing();
                 break;
             case R.id.btnMyLocation:
-                //new locatingAsync(this).execute();
                 myLocation();
-
                 break;
             case R.id.btnHoRes:
                 searchHotelnRestaurant();
@@ -280,21 +233,29 @@ public class MainActivity extends AppCompatActivity implements MapEventsReceiver
         btnPlace.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Geocoding(autoTv.getText().toString());
-                //new searchAsync(this).execute(autoTv.getText().toString());
-
-                // Thêm các Marker vào mỗi địa điểm tìm được
-                for (int i = 0; i < places.size(); i++) {
-                    places.get(i).addMarker(map);
-                }
-
-                // Nếu tìm được thì đưa Camera vào địa điểm đầu tiên trong mảng
-                if (!places.isEmpty()) {
-                    map.getController().setCenter(places.get(0).geoPoint);
-                    map.getController().setZoom(16);
-                }
                 // tắt dialog
                 dialogSeracch.dismiss();
+
+
+                map.getOverlays().clear();
+                if (places != null) {
+                    places.clear();
+                }
+                //Geocoding(autoTv.getText().toString());
+                new searchAsync(MainActivity.this).execute(autoTv.getText().toString());
+
+//                // Thêm các Marker vào mỗi địa điểm tìm được
+//                for (int i = 0; i < places.size(); i++) {
+//                    places.get(i).addMarker(map);
+//                }
+//
+//                // Nếu tìm được thì đưa Camera vào địa điểm đầu tiên trong mảng
+//                if (!places.isEmpty()) {
+//                    map.getController().setCenter(places.get(0).geoPoint);
+//                    map.getController().setZoom(16);
+//                }
+////                // tắt dialog
+////                dialogSeracch.dismiss();
             }
         });
         map.invalidate();
@@ -318,43 +279,9 @@ public class MainActivity extends AppCompatActivity implements MapEventsReceiver
         btnFindpath.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Chuyển từ tên thành tọa độ
-                // Lấy cặp tọa độ đầu tiên trong mảng tọa độ của mỗi địa điểm
-                Place sPlace = Geocoding(startPlace.getText().toString());
-                Place ePlace = Geocoding(endPlace.getText().toString());
 
-                //1. Tạo RoadManager để thao tác
-                RoadManager roadManager = new GraphHopperRoadManager(KEY, true);
-
-                //2. Tìm đường từ startpoint đến endpoint
-                //OSM không cho tìm đường theo tên mà theo tọa độ
-                ArrayList<GeoPoint> waypoints = new ArrayList<GeoPoint>();
-                waypoints.add(sPlace.geoPoint);
-                waypoints.add(ePlace.geoPoint);
-
-                // Tìm kiếm đường đi
-                Road road = roadManager.getRoad(waypoints);
-                // Tạo các đường Polyline từ đường đi
-                Polyline roadOverlay = RoadManager.buildRoadOverlay(road);
-                // Vẽ Polyline lên map
-                map.getOverlays().add(roadOverlay);
-
-                // Thêm Marker địa điểm bắt đầu và kết thúc
-                sPlace.addMarker(map);
-                ePlace.addMarker(map);
-
-                // Đưa camera về địa điểm bắt đầu
-                map.getController().setCenter(sPlace.geoPoint);
-
-                tvDistance.setText(String.format("%.2f", road.mLength));   // km
-                tvDuration.setText(String.format("%.1f", road.mDuration/60)); // s
-
-                //
-                Toast.makeText(MainActivity.this, tvDistance.getText() + " km" + " - " + tvDuration.getText() + " min", Toast.LENGTH_LONG).show();
-                // Tắt dialog
                 dialogRouting.dismiss();
-
-
+                new routinhAsync(MainActivity.this).execute(startPlace.getText().toString(),endPlace.getText().toString());
             }
         });
 
@@ -363,31 +290,29 @@ public class MainActivity extends AppCompatActivity implements MapEventsReceiver
 
     // Tim vi tri hien tai
     public void myLocation() {
-//        final IMapController mapController = map.getController();
-
 
         myLocationNewOverlay = new MyLocationNewOverlay(map);
-        myLocationNewOverlay.disableMyLocation();
-        myLocationNewOverlay.disableFollowLocation();
-
         myLocationNewOverlay.enableMyLocation();
         map.getOverlays().clear();
         map.getOverlays().add(myLocationNewOverlay);
         myLocationNewOverlay.enableFollowLocation();
         myLocationNewOverlay.setDrawAccuracyEnabled(true);
 
+
         myLocationNewOverlay.runOnFirstFix(new Runnable() {
+            @Override
             public void run() {
-                try {
-                    myPoint = myLocationNewOverlay.getMyLocation();
-                    map.getController().setZoom(15);
-                    map.getController().animateTo(myPoint);
-
-                } catch (Exception e) {
-
-                }
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        myPoint = myLocationNewOverlay.getMyLocation();
+                        map.getController().setZoom(15);
+                        map.getController().animateTo(myPoint);
+                    }
+                });
             }
         });
+
         map.invalidate();
     }
 
@@ -418,14 +343,14 @@ public class MainActivity extends AppCompatActivity implements MapEventsReceiver
     }
 
     public void searchHotelnRestaurant(){
-        String j = myPoint.toString();
-        hoRes(map,"Hotel");
-        hoRes(map,"Restaurant");
+//        hoRes(map,"Hotel");
+//        hoRes(map,"Restaurant");
+        new hoResAsync(MainActivity.this).execute("Hotel","Restaurant");
         map.invalidate();
     }
 
     // Tim cac dia diam "key" va in ra map
-    public void hoRes(MapView map, String key){
+    public void hoRes(final MapView map, final String key){
         //5. Tìm cái địa điểm là "key" ( tìm kiếm trong phạm vị hình vuông ) quanh vị trí myPoint
         NominatimPOIProvider poiProvider = new NominatimPOIProvider("OsmNavigator/1.0");
 
@@ -434,113 +359,165 @@ public class MainActivity extends AppCompatActivity implements MapEventsReceiver
         //* @param maxDistance to the position, in degrees.
         //* Note that it is used to build a bounding box around the position, not a circle.
 
-        ArrayList<POI> pois = poiProvider.getPOICloseTo(myPoint, key, 20, 0.005);
+        final ArrayList<POI> pois = poiProvider.getPOICloseTo(myPoint, key, 20, 0.005);
 
-        FolderOverlay poiMarkers = new FolderOverlay(this);
-        map.getOverlays().add(poiMarkers);
-        // Thêm icon hotel
-        Drawable poiIcon = getResources().getDrawable(R.drawable.hotel);
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                FolderOverlay poiMarkers = new FolderOverlay(MainActivity.this);
+                map.getOverlays().add(poiMarkers);
+                // Thêm icon hotel
+                Drawable poiIcon = getResources().getDrawable(R.drawable.hotel);
 
-        if(key.equals("Restaurant")){
-            poiIcon = getResources().getDrawable(R.drawable.restaurant);
-        }
+                if(key.equals("Restaurant")){
+                    poiIcon = getResources().getDrawable(R.drawable.restaurant);
+                }
 
-        // Add Marker các địa điểm
-        for (POI poi:pois){
-            Marker poiMarker = new Marker(map);
-            poiMarker.setTitle(poi.mType);
-            poiMarker.setSnippet(poi.mDescription);
-            poiMarker.setPosition(poi.mLocation);
-            poiMarker.setIcon(poiIcon);
+                // Add Marker các địa điểm
+                for (POI poi:pois){
+                    Marker poiMarker = new Marker(map);
+                    poiMarker.setTitle(poi.mType);
+                    poiMarker.setSnippet(poi.mDescription);
+                    poiMarker.setPosition(poi.mLocation);
+                    poiMarker.setIcon(poiIcon);
 //            if (poi.mThumbnail != null){
 //                poiItem.setImage(new BitmapDrawable(poi.mThumbnail));
 //            }
-            poiMarkers.add(poiMarker);
-        }
+                    poiMarkers.add(poiMarker);
+                }
+            }
+        });
+
+
     }
 
-    private class locatingAsync extends AsyncTask<Void,Void,Void> {
+    private class hoResAsync extends AsyncTask<String,Void,Void>{
         private ProgressDialog dialog;
+        String key;
+        ArrayList<POI> pois = new ArrayList<>();
 
-        public locatingAsync(MainActivity activity) {
+        public hoResAsync(MainActivity activity) {
+            super();
             dialog = new ProgressDialog(activity);
         }
 
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            map.getOverlays().clear();
-            dialog.setMessage("Loading...");
-            dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+            dialog.setTitle("Finding Hotel & Restaurant");
+            dialog.setMessage("Working...");
             dialog.show();
         }
 
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-//            map.getOverlays().add(myLocationNewOverlay);
-//            map.getController().setZoom(15);
-//            map.getController().animateTo(myPoint);
-//            map.invalidate();
-            myLocationNewOverlay = new MyLocationNewOverlay(map);
-            myLocationNewOverlay.disableMyLocation();
-            myLocationNewOverlay.disableFollowLocation();
-
-            myLocationNewOverlay.enableMyLocation();
-            // map.getOverlays().clear();
-            map.getOverlays().add(myLocationNewOverlay);
-            myLocationNewOverlay.enableFollowLocation();
-            myLocationNewOverlay.setDrawAccuracyEnabled(true);
-
-            myLocationNewOverlay.runOnFirstFix(new Runnable() {
-                public void run() {
-                    try {
-                        myPoint = myLocationNewOverlay.getMyLocation();
-                        map.getController().setZoom(15);
-                        map.getController().animateTo(myPoint);
-
-                    } catch (Exception e) {
-
-                    }
-                }
-            });
-            if (dialog.isShowing())
+            if(dialog.isShowing())
                 dialog.dismiss();
+            map.invalidate();
         }
 
+        @Override
+        protected void onProgressUpdate(Void... values) {
+            super.onProgressUpdate(values);
+            FolderOverlay poiMarkers = new FolderOverlay(MainActivity.this);
+            map.getOverlays().add(poiMarkers);
+            // Thêm icon hotel
+            Drawable poiIcon = getResources().getDrawable(R.drawable.hotel);
+            if(key.equals("Restaurant")){
+                poiIcon = getResources().getDrawable(R.drawable.restaurant);
+            }
+
+            // Add Marker các địa điểm
+            for (POI poi:pois){
+                Marker poiMarker = new Marker(map);
+                poiMarker.setTitle(poi.mType);
+                poiMarker.setSnippet(poi.mDescription);
+                poiMarker.setPosition(poi.mLocation);
+                poiMarker.setIcon(poiIcon);
+//            if (poi.mThumbnail != null){
+//                poiItem.setImage(new BitmapDrawable(poi.mThumbnail));
+//            }
+                poiMarkers.add(poiMarker);
+            }
+        }
 
         @Override
-        protected Void doInBackground(Void... voids) {
-//            myLocationNewOverlay = new MyLocationNewOverlay(map);
-//            myLocationNewOverlay.disableMyLocation();
-//            myLocationNewOverlay.disableFollowLocation();
-//
-//            myLocationNewOverlay.enableMyLocation();
-//            //map.getOverlays().clear();
-//            //map.getOverlays().add(myLocationNewOverlay);
-//            myLocationNewOverlay.enableFollowLocation();
-//            myLocationNewOverlay.setDrawAccuracyEnabled(true);
-//
-//            myLocationNewOverlay.runOnFirstFix(new Runnable() {
-//                public void run() {
-//                    try {
-//                        myPoint = myLocationNewOverlay.getMyLocation();
-//                        //.getController().setZoom(15);
-//                        //map.getController().animateTo(myPoint);
-//
-//                    } catch (Exception e) {
-//
-//                    }
-//                }
-//            });
-//            //map.invalidate();
-//            return null;
-//        }
-            return  null;
+        protected Void doInBackground(String... strings) {
+            NominatimPOIProvider poiProvider = new NominatimPOIProvider("OsmNavigator/1.0");
+            for(int i = 0 ; i < strings.length; i++) {
+                key = strings[i];
+                pois = poiProvider.getPOICloseTo(myPoint, key, 20, 0.005);
+                onProgressUpdate();
+            }
+            return null;
         }
     }
 
-    private class searchAsync extends AsyncTask<String,Void,Void>{
+//    private class locatingAsync extends AsyncTask<Void,Overlay,Void> {
+//        private ProgressDialog dialog;
+//        MyLocationNewOverlay LocationNewOverlay;  // Dùng để tìm vị trị hiện tại
+//        public locatingAsync(MainActivity activity) {
+//            dialog = new ProgressDialog(activity);
+//        }
+//
+//        @Override
+//        protected void onPreExecute() {
+//            super.onPreExecute();
+//            map.getOverlays().clear();
+//            dialog.setTitle("Locating");
+//            dialog.setMessage("Loading...");
+//            dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+//            dialog.show();
+//        }
+//
+//        @Override
+//        protected void onProgressUpdate(Overlay... values) {
+//            super.onProgressUpdate(values);
+//            map.getOverlays().add(values[0]);
+//        }
+//
+//        @Override
+//        protected void onPostExecute(Void aVoid) {
+//            super.onPostExecute(aVoid);
+//            LocationNewOverlay = new MyLocationNewOverlay(map);
+//
+//            LocationNewOverlay.enableMyLocation();
+//            onProgressUpdate(LocationNewOverlay);
+//            LocationNewOverlay.enableFollowLocation();
+//            LocationNewOverlay.setDrawAccuracyEnabled(true);
+//
+//            LocationNewOverlay.runOnFirstFix(new Runnable() {
+//                @Override
+//                public void run() {
+//                    runOnUiThread(new Runnable() {
+//                        @Override
+//                        public void run() {
+//                            myPoint = LocationNewOverlay.getMyLocation();
+//                            map.getController().setZoom(15);
+//                            map.getController().animateTo(myPoint);
+//                        }
+//                    });
+//                }
+//            });
+//
+//            if (dialog.isShowing())
+//                dialog.dismiss();
+//        }
+//
+//
+//        @Override
+//        protected Void doInBackground(Void... voids) {
+////            LocationNewOverlay = new MyLocationNewOverlay(map);
+////            LocationNewOverlay.enableMyLocation();
+////            onProgressUpdate(LocationNewOverlay);
+////            LocationNewOverlay.enableFollowLocation();
+////            LocationNewOverlay.setDrawAccuracyEnabled(true);
+//            return  null;
+//        }
+//    }
+
+    private class searchAsync extends AsyncTask<String,Place,Void>{
         private ProgressDialog dialog;
         String jString;
         public searchAsync(MainActivity activity) {
@@ -550,16 +527,46 @@ public class MainActivity extends AppCompatActivity implements MapEventsReceiver
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            map.getOverlays().clear();
-            if (places != null) {
-                places.clear();
-            }
-
+//            map.getOverlays().clear();
+//            if (places != null) {
+//                places.clear();
+//            }
+            places = new ArrayList<Place>();
+            dialog.setTitle("Finding place");
+            dialog.setMessage("Working...");
+            dialog.show();
         }
 
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
+            // Thêm các Marker vào mỗi địa điểm tìm được
+            for (int i = 0; i < places.size(); i++) {
+                places.get(i).addMarker(map);
+            }
+
+            // Nếu tìm được thì đưa Camera vào địa điểm đầu tiên trong mảng
+            if (!places.isEmpty()) {
+                map.getController().setCenter(places.get(0).geoPoint);
+                map.getController().setZoom(16);
+            }
+            if(dialog.isShowing())  dialog.dismiss();
+            return ;
+        }
+
+        @Override
+        protected void onProgressUpdate(Place... values) {
+            super.onProgressUpdate(values);
+            places.add(values[0]);
+
+        }
+
+        @Override
+        protected Void doInBackground(String... voids) {
+            // URL theo khi tìm kiếm dựa trên Graphhoper
+            String url = urlGeocoding + voids[0] + "&locale=" + locale + "&debug=true&key=" + KEY;
+            // Lấy thông tin dạng JSON về
+            jString = BonusPackHelper.requestStringFromUrl(url);
             try {
                 JSONObject jsonObject = new JSONObject(jString);
                 JSONArray jsonArray = jsonObject.optJSONArray("hits");
@@ -572,7 +579,8 @@ public class MainActivity extends AppCompatActivity implements MapEventsReceiver
                 for (int i = 0; i < jsonArray.length(); i++) {
                     JSONObject jPlace = jsonArray.getJSONObject(i);
                     Place place = new Place(jPlace);
-                    places.add(place);
+                    //places.add(place);
+                    onProgressUpdate(place);
 
                 }
 
@@ -580,15 +588,79 @@ public class MainActivity extends AppCompatActivity implements MapEventsReceiver
                 e.printStackTrace();
 
             }
-            return ;
+            return null;
+        }
+    }
+
+    private class routinhAsync extends AsyncTask<String,GeoPoint,Void>{
+
+        ProgressDialog dialog;
+        Place sPlace;
+        Place ePlace ;
+        Polyline roadOverlay;
+        //OSM không cho tìm đường theo tên mà theo tọa độ
+        ArrayList<GeoPoint> waypoints = new ArrayList<GeoPoint>();
+
+        public routinhAsync(MainActivity activity) {
+            super();
+            dialog = new ProgressDialog(activity);
         }
 
         @Override
-        protected Void doInBackground(String... voids) {
-            // URL theo khi tìm kiếm dựa trên Graphhoper
-            String url = urlGeocoding + voids + "&locale=" + locale + "&debug=true&key=" + KEY;
-            // Lấy thông tin dạng JSON về
-            jString = BonusPackHelper.requestStringFromUrl(url);
+        protected void onPreExecute() {
+            super.onPreExecute();
+            dialog.setTitle("Routing");
+            dialog.setMessage("Working");
+            dialog.show();
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            // Vẽ Polyline lên map
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    map.getOverlays().add(roadOverlay);
+
+                    // Thêm Marker địa điểm bắt đầu và kết thúc
+                    sPlace.addMarker(map);
+                    ePlace.addMarker(map);
+
+                    // Đưa camera về địa điểm bắt đầu
+                    map.getController().setCenter(sPlace.geoPoint);
+                }
+            });
+            if(dialog.isShowing())
+                dialog.dismiss();
+        }
+
+        @Override
+        protected void onProgressUpdate(GeoPoint... values) {
+            super.onProgressUpdate(values);
+            waypoints.add(values[0]);
+        }
+
+        @Override
+        protected Void doInBackground(String... strings) {
+            sPlace = Geocoding(strings[0]);
+            ePlace = Geocoding(strings[1]);
+            //1. Tạo RoadManager để thao tác
+            RoadManager roadManager = new GraphHopperRoadManager(KEY, true);
+
+            //2. Tìm đường từ startpoint đến endpoint
+
+            waypoints.add(sPlace.getGeoPoint());
+            waypoints.add(ePlace.getGeoPoint());
+
+            // Tìm kiếm đường đi
+            Road road = roadManager.getRoad(waypoints);
+            // Tạo các đường Polyline từ đường đi
+            roadOverlay = RoadManager.buildRoadOverlay(road);
+
+            //tvDistance.setText(String.format("%.2f", road.mLength));   // km
+            //tvDuration.setText(String.format("%.1f", road.mDuration/60)); // s
+
             return null;
         }
     }
