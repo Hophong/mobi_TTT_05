@@ -31,7 +31,6 @@
         </activity>
 
         <activity android:name=".main_screen"></activity>
-        <activity android:name=".Signin"></activity>
 
     </application>
 

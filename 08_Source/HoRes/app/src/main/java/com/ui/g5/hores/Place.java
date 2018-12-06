@@ -1,10 +1,13 @@
 package com.ui.g5.hores;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.Marker;
+
+import java.util.ArrayList;
 
 // Lưu thông tin cần thiết của một địa điểm và các thao tác
 
@@ -56,12 +59,27 @@ public class Place {
 
     public Place(JSONObject jPlace) {
         try {
-            JSONObject jGeopoint = jPlace.getJSONObject("point");
-            GeoPoint point = new GeoPoint(jGeopoint.getDouble("lat"), jGeopoint.getDouble("lng"));
+            JSONObject geometry = jPlace.optJSONObject("geometry");
+
+            JSONArray coordinates = geometry.optJSONArray("coordinates");
+
+            double lng = coordinates.getDouble(0);
+            double lat = coordinates.optDouble(1);
+
+            GeoPoint point = new GeoPoint(lat,lng);
             this.geoPoint = point;
-            this.name = jPlace.getString("name");
-            this.street = jPlace.getString("street");
-            this.city = jPlace.getString("city");
+
+            JSONObject jsonProperty = jPlace.optJSONObject("properties");
+            this.name = jsonProperty.getString("name");
+            this.city = jsonProperty.optString("city");
+            this.street = jsonProperty.optString("street");
+
+//            JSONObject jGeopoint = jPlace.getJSONObject("point");
+//            GeoPoint point = new GeoPoint(jGeopoint.getDouble("lat"), jGeopoint.getDouble("lng"));
+//            this.geoPoint = point;
+//            this.name = jPlace.getString("name");
+//            this.street = jPlace.getString("street");
+//            this.city = jPlace.getString("city");
 
         } catch (JSONException e) {
 

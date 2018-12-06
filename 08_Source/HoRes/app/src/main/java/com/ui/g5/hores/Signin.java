@@ -57,6 +57,9 @@ public class Signin extends Fragment {
        btnSignin.setOnClickListener(new View.OnClickListener() {
                @Override
                public void onClick(View v) {
+
+                   //Intent intent=new Intent(getActivity(),main_screen.class);
+                   //startActivity(intent);
                    String user=edtUsername.getText().toString();
                    String pass=edtPassword.getText().toString();
                    int i=0;

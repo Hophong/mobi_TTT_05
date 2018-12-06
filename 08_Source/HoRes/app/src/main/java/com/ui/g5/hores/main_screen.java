@@ -1,6 +1,5 @@
 package com.ui.g5.hores;
 
-<<<<<<< HEAD
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.Dialog;
@@ -12,14 +11,13 @@ import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.StrictMode;
 import android.preference.PreferenceManager;
-=======
->>>>>>> master
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
@@ -62,9 +60,6 @@ public class main_screen extends AppCompatActivity implements MapEventsReceiver{
 
 
     ImageView btnmenu;
-
-    FloatingActionButton location, floatBtn;
-
     String url_getdata = "https://nqphu1998.000webhostapp.com/getdata.php";
     ArrayList<User> arrayList;
     String user="",email="";
@@ -78,6 +73,8 @@ public class main_screen extends AppCompatActivity implements MapEventsReceiver{
     MyLocationNewOverlay myLocationNewOverlay;                                                      // Quan ly dinh vi
     FloatingActionButton location, floatBtn, btnTimkiem, btnChiduong, btnTimkiemxungquanh;
 
+    Place origin, destination;
+
     boolean HideFloatBtn = true;
 
 
@@ -85,15 +82,9 @@ public class main_screen extends AppCompatActivity implements MapEventsReceiver{
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-<<<<<<< HEAD
         // Sử dụng Mapview của osmdroid
         Context ctx = getApplicationContext();
         org.osmdroid.config.Configuration.getInstance().load(ctx, PreferenceManager.getDefaultSharedPreferences(ctx));
-=======
-        location = (FloatingActionButton)findViewById(R.id.locateBtn);
-        floatBtn = (FloatingActionButton)findViewById(R.id.floatingBtn);
-        btnmenu=(ImageView) findViewById(R.id.btnmenu);
->>>>>>> master
 
         setContentView(R.layout.activity_main_screen);
         Bundle bundle = getIntent().getExtras();
@@ -104,7 +95,7 @@ public class main_screen extends AppCompatActivity implements MapEventsReceiver{
 
         }
 
-
+        btnmenu=(ImageView) findViewById(R.id.btnmenu);
         btnmenu.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -112,7 +103,6 @@ public class main_screen extends AppCompatActivity implements MapEventsReceiver{
             }
         });
 
-<<<<<<< HEAD
         // Điều kiện để dùng thư viện osmbonuspack
         if (android.os.Build.VERSION.SDK_INT > 9) {
             StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
@@ -170,16 +160,6 @@ public class main_screen extends AppCompatActivity implements MapEventsReceiver{
             }
         });
 
-=======
-        location.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // to do
-            }
-        });
-
-        
->>>>>>> master
     }
 
     private void ShowFloatingBtn() {
@@ -230,7 +210,14 @@ public class main_screen extends AppCompatActivity implements MapEventsReceiver{
     @Override
     public boolean singleTapConfirmedHelper(GeoPoint p) {
         Place place = reverseGeocoding(p);
+        // Xoa marker tren map
+        map.getOverlays().clear();
+        if (places != null) {
+            places.clear();
+        }
         place.addMarker(map);
+        map.getController().setCenter(place.geoPoint);
+        map.getController().setZoom(16);
         map.invalidate();
         return true;
     }
@@ -318,21 +305,37 @@ public class main_screen extends AppCompatActivity implements MapEventsReceiver{
         dialogSeracch.setTitle("Tìm địa điểm");
         dialogSeracch.show();
 
-        final EditText autoTv = dialogSeracch.findViewById(R.id.autoTV);
-        Button btnPlace = dialogSeracch.findViewById(R.id.btnPlace);
+        final AutoCompleteTextView autoCompleteTextView = (AutoCompleteTextView)dialogSeracch.findViewById(R.id.autoCompleteTextView);
+        final AutoCompleteAdapter adapter = new AutoCompleteAdapter(main_screen.this,R.layout.custom_item_autocompletetextview,R.id.autoCompleteItem);
 
-        btnPlace.setOnClickListener(new View.OnClickListener() {
+        autoCompleteTextView.setAdapter(adapter);                                                   // Thiết lập adapter cho autocomplete textview
+        autoCompleteTextView.setThreshold(3);                                                       // Thiết lập số ký tự tối thiểu cho việc tìm kiếm
+
+        autoCompleteTextView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
-            public void onClick(View v) {
-                // tắt dialog
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+                autoCompleteTextView.setSelection(0);
+
+                // Tat dialog
                 dialogSeracch.dismiss();
 
+                // Xoa marker tren map
                 map.getOverlays().clear();
                 if (places != null) {
                     places.clear();
                 }
 
-                new searchAsync(main_screen.this).execute(autoTv.getText().toString());
+                // Lay danh sach cac dia diem tim duoc
+                places = adapter.getArrayPlace();
+
+                // Lay ra dia diem duoc chon
+                Place temp = places.get(position);
+
+                // Them marker, chinh camera
+                places.get(position).addMarker(map);
+                map.getController().setCenter(places.get(position).geoPoint);
+                map.getController().setZoom(16);
 
             }
         });
@@ -340,7 +343,7 @@ public class main_screen extends AppCompatActivity implements MapEventsReceiver{
         map.invalidate();
     }
 
-    // Tim quang duong
+    // Tim duong di
     public void routing() {
 
         final Dialog dialogRouting = new Dialog(this);
@@ -350,14 +353,52 @@ public class main_screen extends AppCompatActivity implements MapEventsReceiver{
 
         final AutoCompleteTextView startPlace = dialogRouting.findViewById(R.id.start);
         final AutoCompleteTextView endPlace = dialogRouting.findViewById(R.id.end);
+
+        final AutoCompleteAdapter adapterStart = new AutoCompleteAdapter(main_screen.this,R.layout.custom_item_autocompletetextview,R.id.autoCompleteItem);
+        final AutoCompleteAdapter adapterEnd = new AutoCompleteAdapter(main_screen.this,R.layout.custom_item_autocompletetextview,R.id.autoCompleteItem);
+
+        startPlace.setAdapter(adapterStart);
+        endPlace.setAdapter(adapterEnd);
+
+        startPlace.setThreshold(3);
+        endPlace.setThreshold(3);
+
+
+
+        startPlace.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                origin = adapterStart.getArrayPlace().get(position);
+                startPlace.setText(adapterStart.getItem(position));
+            }
+        });
+
+        endPlace.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                destination = adapterEnd.getArrayPlace().get(position);
+                endPlace.setText(adapterEnd.getItem(position));
+            }
+        });
+
+
         Button btnFindpath = dialogRouting.findViewById(R.id.btnFindpath);
 
         btnFindpath.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                // Xóa hết các marker trên bản đồ
+                map.getOverlays().clear();
+                if (places != null) {
+                    places.clear();
+                }
 
+                // Tat dialog
                 dialogRouting.dismiss();
-                new routingAsync(main_screen.this).execute(startPlace.getText().toString(), endPlace.getText().toString());
+
+                //Tim duong
+                new routingAsync(main_screen.this).execute(origin,destination);
+
             }
         });
 
@@ -391,8 +432,9 @@ public class main_screen extends AppCompatActivity implements MapEventsReceiver{
 
     // Chuyen toa do thanh dia chi
     public Place reverseGeocoding(GeoPoint geoPoint) {
-        String point = Double.toString(geoPoint.getLatitude()) + "," + Double.toString(geoPoint.getLongitude());
-        String url = urlReverseGeocoding + point + "&locale=" + locale + "&debug=true&key=" + KEY;
+        String spoint = Double.toString(geoPoint.getLatitude()) + ","+Double.toString(geoPoint.getLongitude());
+        String url = urlReverseGeocoding + spoint + "&locale=" + locale + "&debug=true&key=" + KEY;
+        //String url = "http://photon.komoot.de/reverse?"+point;
         String jString = BonusPackHelper.requestStringFromUrl(url);
         Place place = null;
         try {
@@ -402,8 +444,16 @@ public class main_screen extends AppCompatActivity implements MapEventsReceiver{
                 Toast.makeText(this, "No place", Toast.LENGTH_SHORT).show();
                 return null;
             }
-            JSONObject jPlace = jsonArray.getJSONObject(0);
-            place = new Place(jPlace);
+            JSONObject jPlace = jsonArray.optJSONObject(0);
+            JSONObject jGeopoint = jPlace.optJSONObject("point");
+            GeoPoint point = new GeoPoint(jGeopoint.optDouble("lat"), jGeopoint.optDouble("lng"));
+            String name = jPlace.optString("name");
+            String street = jPlace.optString("street");
+            String city =  jPlace.optString("city");
+
+            place = new Place(point,name,street,city);
+
+
         } catch (JSONException e) {
 
         }
@@ -502,105 +552,7 @@ public class main_screen extends AppCompatActivity implements MapEventsReceiver{
         }
     }
 
-    private class searchAsync extends AsyncTask<String, Place, Boolean> {
-        private ProgressDialog dialog;
-        String jString;
-
-        public searchAsync(Activity activity) {
-            dialog = new ProgressDialog(activity);
-        }
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-
-            places = new ArrayList<>();
-            dialog.setTitle("Finding place");
-            dialog.setMessage("Working...");
-            dialog.show();
-        }
-
-
-        @Override
-        protected void onProgressUpdate(Place... values) {
-            super.onProgressUpdate(values);
-            places.add(values[0]);
-
-        }
-
-        @Override
-        protected Boolean doInBackground(String... voids) {
-            // URL theo khi tìm kiếm dựa trên Graphhoper
-            if (voids[0].equals("")) {
-                return false;
-            }
-
-            String url = urlGeocoding + voids[0] + "&locale=" + locale + "&debug=true&key=" + KEY;
-            jString = BonusPackHelper.requestStringFromUrl(url);
-
-            try {
-                JSONObject jsonObject = new JSONObject(jString);
-                JSONArray jsonArray = jsonObject.optJSONArray("hits");
-
-                // Thêm các địa điểm vào mảng places
-                for (int i = 0; i < jsonArray.length(); i++) {
-                    try {
-                        JSONObject jPlace = jsonArray.getJSONObject(i);
-                        Place place = new Place(jPlace);
-                        onProgressUpdate(place);
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                        return false;
-                    }
-                }
-
-                return (!places.isEmpty());
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-
-            return false;
-        }
-
-        @Override
-        protected void onPostExecute(Boolean isSuccess) {
-            super.onPostExecute(isSuccess);
-
-            if (isSuccess) {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        places.get(0).addMarker(map);
-
-                        // Nếu tìm được thì đưa Camera vào địa điểm đầu tiên trong mảng
-                        if (!places.isEmpty()) {
-                            map.getController().setCenter(places.get(0).geoPoint);
-                            map.getController().setZoom(16);
-                        }
-
-                        if (dialog.isShowing()) dialog.dismiss();
-                    }
-                });
-            } else {
-                dialog.setTitle("WARNING!");
-                dialog.setMessage("Not found location...");
-                dialog.show();
-
-                new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        dialog.dismiss();
-                    }
-                }, 2000);
-            }
-
-
-        }
-
-
-    }
-
-    private class routingAsync extends AsyncTask<String, GeoPoint, Boolean> {
+    private class routingAsync extends AsyncTask<Place, GeoPoint, Boolean> {
 
         ProgressDialog dialog;
         Place sPlace;
@@ -665,11 +617,11 @@ public class main_screen extends AppCompatActivity implements MapEventsReceiver{
         }
 
         @Override
-        protected Boolean doInBackground(String... strings) {
+        protected Boolean doInBackground(Place... values) {
             Boolean isSuccess = false;
             try {
-                sPlace = Geocoding(strings[0]);
-                ePlace = Geocoding(strings[1]);
+                sPlace = values[0];
+                ePlace = values[1];
 
                 //1. Tạo RoadManager để thao tác
                 RoadManager roadManager = new GraphHopperRoadManager(KEY, true);
@@ -685,7 +637,7 @@ public class main_screen extends AppCompatActivity implements MapEventsReceiver{
                 roadOverlay = RoadManager.buildRoadOverlay(road);
 
                 isSuccess = true;
-            } catch (JSONException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
 
