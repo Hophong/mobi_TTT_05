@@ -2,11 +2,15 @@ package com.ui.g5.hores;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
+import android.util.Base64;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,6 +18,14 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.facebook.AccessToken;
+import com.facebook.CallbackManager;
+import com.facebook.FacebookCallback;
+import com.facebook.FacebookException;
+import com.facebook.login.LoginManager;
+import com.facebook.login.LoginResult;
+import com.facebook.login.widget.LoginButton;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
@@ -28,9 +40,14 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+
+import static com.facebook.FacebookSdk.getApplicationContext;
 
 @SuppressLint("ValidFragment")
 public class Signin extends Fragment {
@@ -43,6 +60,11 @@ public class Signin extends Fragment {
     TextView tvSignup, tvHaveAccount;
 
     String url_getdata = "https://nqphu1998.000webhostapp.com/getdata.php";
+    private static final String EMAIL = "email";
+
+    // Login Facebook
+    private LoginButton loginFacebook;
+    private CallbackManager callbackManager;
 
     @Nullable
     @Override
@@ -53,6 +75,40 @@ public class Signin extends Fragment {
         ReadJson(url_getdata);
 
         anhxa();
+
+        callbackManager = CallbackManager.Factory.create();
+
+        loginFacebook = (LoginButton) view.findViewById(R.id.login_facebook);
+        loginFacebook.setReadPermissions(Arrays.asList(EMAIL));
+
+        loginFacebook.registerCallback(callbackManager,
+                new FacebookCallback<LoginResult>() {
+                    @Override
+                    public void onSuccess(LoginResult loginResult) {
+                        Toast.makeText(getActivity(), "Successfully logged in", Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onCancel() {
+                        Toast.makeText(getActivity(), "Login canceled", Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onError(FacebookException exception) {
+                        // App code
+                        Toast.makeText(getActivity(), "onError", Toast.LENGTH_SHORT).show();
+
+                    }
+                });
+
+        loginFacebook.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (AccessToken.getCurrentAccessToken() == null) {
+                    Toast.makeText(getActivity(), "Logged out", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
 
        btnSignin.setOnClickListener(new View.OnClickListener() {
                @Override
@@ -109,6 +165,12 @@ public class Signin extends Fragment {
 
 
         return view;
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        callbackManager.onActivityResult(requestCode, resultCode, data);
+        super.onActivityResult(requestCode, resultCode, data);
     }
 
     private void anhxa()
