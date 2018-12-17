@@ -6,6 +6,7 @@ import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.ComponentName;
 import android.content.Context;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Handler;
@@ -59,7 +60,6 @@ import java.util.ArrayList;
 
 public class main_screen extends AppCompatActivity implements MapEventsReceiver{
 
-
     ImageView btnmenu;
     String url_getdata = "https://nqphu1998.000webhostapp.com/getdata.php";
     ArrayList<User> arrayList;
@@ -73,10 +73,12 @@ public class main_screen extends AppCompatActivity implements MapEventsReceiver{
     GeoPoint myPoint;                                                                               // Toa do cua nguoi dung
     MyLocationNewOverlay myLocationNewOverlay;                                                      // Quan ly dinh vi
     FloatingActionButton location, floatBtn, btnTimkiem, btnChiduong, btnTimkiemxungquanh;
+    Place myPlace;
 
     Place origin, destination;
 
     boolean HideFloatBtn = true;
+    MapEventsOverlay mapEventsOverlay;                                                              // Xu ly khi touch vao man hinh ( add marker)
 
 
     @Override
@@ -138,7 +140,7 @@ public class main_screen extends AppCompatActivity implements MapEventsReceiver{
         startMarker.setTitle("Đại học Khoa học tự nhiên - ĐHQG tp HCM");
 
         // Khi touch vao mot vi tri tren ban do
-        MapEventsOverlay mapEventsOverlay = new MapEventsOverlay(this);
+        mapEventsOverlay = new MapEventsOverlay(this);
         map.getOverlays().add(0, mapEventsOverlay); //inserted at the "bottom" of all overlays
 
         // My Location
@@ -208,19 +210,22 @@ public class main_screen extends AppCompatActivity implements MapEventsReceiver{
         popupMenu.show();
     }
 
+
     // Siggle tap
     @Override
     public boolean singleTapConfirmedHelper(GeoPoint p) {
-        Place place = reverseGeocoding(p);
+
+        myPoint = p;
+        myPlace = reverseGeocoding(p);
         // Xoa marker tren map
         map.getOverlays().clear();
-        if (places != null) {
-            places.clear();
-        }
-        place.addMarker(map);
-        map.getController().setCenter(place.geoPoint);
-        map.getController().setZoom(16);
+
+        // Them mapEventsOverlay de xu ly touch
+        map.getOverlays().add(0, mapEventsOverlay);
+
+        myPlace.addMarker(map);
         map.invalidate();
+
         return true;
     }
 
@@ -251,6 +256,8 @@ public class main_screen extends AppCompatActivity implements MapEventsReceiver{
 
         // Xóa hết các marker trên bản đồ
         map.getOverlays().clear();
+        // Them mapEventsOverlay de xu ly touch
+        map.getOverlays().add(0, mapEventsOverlay);
         if (places != null) {
             places.clear();
         }
@@ -324,6 +331,9 @@ public class main_screen extends AppCompatActivity implements MapEventsReceiver{
 
                 // Xoa marker tren map
                 map.getOverlays().clear();
+                // Them mapEventsOverlay de xu ly touch
+                map.getOverlays().add(0, mapEventsOverlay);
+
                 if (places != null) {
                     places.clear();
                 }
@@ -391,6 +401,9 @@ public class main_screen extends AppCompatActivity implements MapEventsReceiver{
             public void onClick(View v) {
                 // Xóa hết các marker trên bản đồ
                 map.getOverlays().clear();
+                // Them mapEventsOverlay de xu ly touch
+                map.getOverlays().add(0, mapEventsOverlay);
+
                 if (places != null) {
                     places.clear();
                 }
@@ -410,6 +423,9 @@ public class main_screen extends AppCompatActivity implements MapEventsReceiver{
     // Tim vi tri hien tai
     public void myLocation() {
         map.getOverlays().clear();
+        // Them mapEventsOverlay de xu ly touch
+        map.getOverlays().add(0, mapEventsOverlay);
+
         map.getOverlays().add(myLocationNewOverlay);
         myLocationNewOverlay.enableMyLocation();
         myLocationNewOverlay.disableFollowLocation();
@@ -464,6 +480,9 @@ public class main_screen extends AppCompatActivity implements MapEventsReceiver{
 
     public void searchHotelnRestaurant() {
         map.getOverlays().clear();
+        // Them mapEventsOverlay de xu ly touch
+        map.getOverlays().add(0, mapEventsOverlay);
+
         new hoResAsync(main_screen.this).execute("Hotel", "Restaurant");
         map.invalidate();
     }
@@ -533,6 +552,9 @@ public class main_screen extends AppCompatActivity implements MapEventsReceiver{
                             poiMarker.setSnippet(poi.mDescription);
                             poiMarker.setPosition(poi.mLocation);
                             poiMarker.setIcon(finalPoiIcon);
+//                            if(poi.mThumbnail != null){
+//                                poiMarker.setImage(new BitmapDrawable(poi.mThumbnail));
+//                            }
 
                             poiMarkers.add(poiMarker);
                         }
