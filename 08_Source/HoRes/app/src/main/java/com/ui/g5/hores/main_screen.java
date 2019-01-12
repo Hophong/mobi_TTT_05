@@ -6,13 +6,20 @@ import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.location.LocationManager;
 import android.os.AsyncTask;
+import android.os.Debug;
 import android.os.Handler;
 import android.os.StrictMode;
 import android.preference.PreferenceManager;
+import android.se.omapi.Session;
 import android.support.design.widget.FloatingActionButton;
+import android.app.Fragment;
+import android.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -34,6 +41,8 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.Volley;
+import com.facebook.AccessToken;
+import com.facebook.login.LoginManager;
 import com.google.android.gms.maps.MapView;
 
 import org.json.JSONArray;
@@ -58,12 +67,12 @@ import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
 import java.util.ArrayList;
 
 
-public class main_screen extends AppCompatActivity implements MapEventsReceiver{
+public class main_screen extends AppCompatActivity implements MapEventsReceiver {
 
     ImageView btnmenu;
     String url_getdata = "https://nqphu1998.000webhostapp.com/getdata.php";
     ArrayList<User> arrayList;
-    String user="",email="";
+    String user = "", email = "";
     org.osmdroid.views.MapView map = null;                                                          // Map
     String KEY = "87c22c26-36bd-468d-9223-61be31580373";                                            // Graphhooper : https://graphhopper.com/dashboard/#/documentation
     String locale = "vi_VI";                                                                        // Khu vực tìm kiếm ở Việt Nam
@@ -80,7 +89,6 @@ public class main_screen extends AppCompatActivity implements MapEventsReceiver{
     boolean HideFloatBtn = true;
     MapEventsOverlay mapEventsOverlay;                                                              // Xu ly khi touch vao man hinh ( add marker)
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -91,14 +99,13 @@ public class main_screen extends AppCompatActivity implements MapEventsReceiver{
 
         setContentView(R.layout.activity_main_screen);
         Bundle bundle = getIntent().getExtras();
-        if(bundle.getString("username")!= null)
-        {
-            user=(String)  bundle.getString("username");
-            email=(String) bundle.getString("email");
+        if (bundle.getString("username") != null) {
+            user = (String) bundle.getString("username");
+            email = (String) bundle.getString("email");
 
         }
 
-        btnmenu=(ImageView) findViewById(R.id.btnmenu);
+        btnmenu = (ImageView) findViewById(R.id.btnmenu);
         btnmenu.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -115,11 +122,12 @@ public class main_screen extends AppCompatActivity implements MapEventsReceiver{
         // Ánh xạ
         map = findViewById(R.id.map);
         myLocationNewOverlay = new MyLocationNewOverlay(map);
-        location = (FloatingActionButton)findViewById(R.id.locateBtn);
-        floatBtn = (FloatingActionButton)findViewById(R.id.floatingBtn);
-        btnChiduong = (FloatingActionButton)findViewById(R.id.btnChiduong);
-        btnTimkiem = (FloatingActionButton)findViewById(R.id.btnTimkiem);
-        btnTimkiemxungquanh = (FloatingActionButton)findViewById(R.id.btnTimkiemxungquanh);
+        location = (FloatingActionButton) findViewById(R.id.locateBtn);
+        floatBtn = (FloatingActionButton) findViewById(R.id.floatingBtn);
+        btnChiduong = (FloatingActionButton) findViewById(R.id.btnChiduong);
+        btnTimkiem = (FloatingActionButton) findViewById(R.id.btnTimkiem);
+        btnTimkiemxungquanh = (FloatingActionButton) findViewById(R.id.btnTimkiemxungquanh);
+
         // Thiết lập cơ bản cho map
         map.setTileSource(TileSourceFactory.MAPNIK);
         map.setBuiltInZoomControls(true);
@@ -154,12 +162,12 @@ public class main_screen extends AppCompatActivity implements MapEventsReceiver{
         floatBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(HideFloatBtn == true) {
+                if (HideFloatBtn == true) {
                     HideFloatBtn = false;
                     ShowFloatingBtn();
-                }else{
+                } else {
                     HideFloatingBtn();
-                    HideFloatBtn=true;
+                    HideFloatBtn = true;
                 }
             }
         });
@@ -178,17 +186,15 @@ public class main_screen extends AppCompatActivity implements MapEventsReceiver{
         btnTimkiemxungquanh.hide();
     }
 
-    private void showmenu()
-    {
-        PopupMenu popupMenu =new PopupMenu(main_screen.this,btnmenu);
-        popupMenu.getMenuInflater().inflate(R.menu.menu,popupMenu.getMenu());
-        popupMenu.getMenu().getItem(0).setTitle("Username:"+user);
-        popupMenu.getMenu().getItem(1).setTitle("Email:"+email);
+    private void showmenu() {
+        PopupMenu popupMenu = new PopupMenu(main_screen.this, btnmenu);
+        popupMenu.getMenuInflater().inflate(R.menu.menu, popupMenu.getMenu());
+        popupMenu.getMenu().getItem(0).setTitle("Username:" + user);
+        popupMenu.getMenu().getItem(1).setTitle("Email:" + email);
         popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
-                switch (item.getItemId())
-                {
+                switch (item.getItemId()) {
                     case R.id.itemtimkiem:
                         break;
                     case R.id.itemdiadiem:
@@ -202,6 +208,7 @@ public class main_screen extends AppCompatActivity implements MapEventsReceiver{
                     case R.id.itemthongtin:
                         break;
                     case R.id.itemdangxuat:
+                        Logout();
                         break;
                 }
                 return false;
@@ -247,6 +254,24 @@ public class main_screen extends AppCompatActivity implements MapEventsReceiver{
     public void onPause() {
         super.onPause();
         map.onPause();
+    }
+
+    // Logout
+    private void Logout(){
+        AccessToken accessToken = AccessToken.getCurrentAccessToken();
+        boolean isLoggedIn = accessToken != null && !accessToken.isExpired();
+
+        if (isLoggedIn) {
+            LoginManager.getInstance().logOut();
+            Log.d("NOTICE: ", "CLEAR ACCESS TOKEN");
+        }
+
+        FragmentTransaction ft = getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.emptyLayout, new Signin());
+
+        ft.commit();
+        Toast.makeText(getApplication(), "Logout successfully", Toast.LENGTH_SHORT).show();
     }
 
     // Tìm địa điểm dựa vào tên và trả về địa điểm đầu tiên trong mảng
@@ -314,8 +339,8 @@ public class main_screen extends AppCompatActivity implements MapEventsReceiver{
         dialogSeracch.setTitle("Tìm địa điểm");
         dialogSeracch.show();
 
-        final AutoCompleteTextView autoCompleteTextView = (AutoCompleteTextView)dialogSeracch.findViewById(R.id.autoCompleteTextView);
-        final AutoCompleteAdapter adapter = new AutoCompleteAdapter(main_screen.this,R.layout.custom_item_autocompletetextview,R.id.autoCompleteItem);
+        final AutoCompleteTextView autoCompleteTextView = (AutoCompleteTextView) dialogSeracch.findViewById(R.id.autoCompleteTextView);
+        final AutoCompleteAdapter adapter = new AutoCompleteAdapter(main_screen.this, R.layout.custom_item_autocompletetextview, R.id.autoCompleteItem);
 
         autoCompleteTextView.setAdapter(adapter);                                                   // Thiết lập adapter cho autocomplete textview
         autoCompleteTextView.setThreshold(3);                                                       // Thiết lập số ký tự tối thiểu cho việc tìm kiếm
@@ -366,15 +391,14 @@ public class main_screen extends AppCompatActivity implements MapEventsReceiver{
         final AutoCompleteTextView startPlace = dialogRouting.findViewById(R.id.start);
         final AutoCompleteTextView endPlace = dialogRouting.findViewById(R.id.end);
 
-        final AutoCompleteAdapter adapterStart = new AutoCompleteAdapter(main_screen.this,R.layout.custom_item_autocompletetextview,R.id.autoCompleteItem);
-        final AutoCompleteAdapter adapterEnd = new AutoCompleteAdapter(main_screen.this,R.layout.custom_item_autocompletetextview,R.id.autoCompleteItem);
+        final AutoCompleteAdapter adapterStart = new AutoCompleteAdapter(main_screen.this, R.layout.custom_item_autocompletetextview, R.id.autoCompleteItem);
+        final AutoCompleteAdapter adapterEnd = new AutoCompleteAdapter(main_screen.this, R.layout.custom_item_autocompletetextview, R.id.autoCompleteItem);
 
         startPlace.setAdapter(adapterStart);
         endPlace.setAdapter(adapterEnd);
 
         startPlace.setThreshold(3);
         endPlace.setThreshold(3);
-
 
 
         startPlace.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -412,7 +436,7 @@ public class main_screen extends AppCompatActivity implements MapEventsReceiver{
                 dialogRouting.dismiss();
 
                 //Tim duong
-                new routingAsync(main_screen.this).execute(origin,destination);
+                new routingAsync(main_screen.this).execute(origin, destination);
 
             }
         });
@@ -422,14 +446,31 @@ public class main_screen extends AppCompatActivity implements MapEventsReceiver{
 
     // Tim vi tri hien tai
     public void myLocation() {
+        Log.d("MY LOCATION: ", "BEGIN");
+
         map.getOverlays().clear();
+        map.getOverlays().add(myLocationNewOverlay);
+
         // Them mapEventsOverlay de xu ly touch
         map.getOverlays().add(0, mapEventsOverlay);
 
-        map.getOverlays().add(myLocationNewOverlay);
         myLocationNewOverlay.enableMyLocation();
         myLocationNewOverlay.disableFollowLocation();
         myLocationNewOverlay.setOptionsMenuEnabled(true);
+
+        if (myLocationNewOverlay.getMyLocation() != null) {
+            double Longitude = myLocationNewOverlay.getMyLocation().getLongitude();
+            double Latitude = myLocationNewOverlay.getMyLocation().getLatitude();
+
+            Log.d("Longitude: ", Double.toString(Longitude));
+            Log.d("Latitude: ", Double.toString(Latitude));
+
+        } else {
+            Log.e("MY LOCATION: ", "NULL OBJECT");
+            if (myLocationNewOverlay.getLastFix() == null) {
+                Log.e("GET LAST FIX: ", "NULL OBJECT");
+            }
+        }
 
         myLocationNewOverlay.runOnFirstFix(new Runnable() {
             @Override
@@ -446,11 +487,13 @@ public class main_screen extends AppCompatActivity implements MapEventsReceiver{
         });
 
         map.invalidate();
+
+        Log.d("MY LOCATION: ", "END");
     }
 
     // Chuyen toa do thanh dia chi
     public Place reverseGeocoding(GeoPoint geoPoint) {
-        String spoint = Double.toString(geoPoint.getLatitude()) + ","+Double.toString(geoPoint.getLongitude());
+        String spoint = Double.toString(geoPoint.getLatitude()) + "," + Double.toString(geoPoint.getLongitude());
         String url = urlReverseGeocoding + spoint + "&locale=" + locale + "&debug=true&key=" + KEY;
         //String url = "http://photon.komoot.de/reverse?"+point;
         String jString = BonusPackHelper.requestStringFromUrl(url);
@@ -467,9 +510,9 @@ public class main_screen extends AppCompatActivity implements MapEventsReceiver{
             GeoPoint point = new GeoPoint(jGeopoint.optDouble("lat"), jGeopoint.optDouble("lng"));
             String name = jPlace.optString("name");
             String street = jPlace.optString("street");
-            String city =  jPlace.optString("city");
+            String city = jPlace.optString("city");
 
-            place = new Place(point,name,street,city);
+            place = new Place(point, name, street, city);
 
 
         } catch (JSONException e) {

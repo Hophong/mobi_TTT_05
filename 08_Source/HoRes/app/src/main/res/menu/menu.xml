@@ -18,4 +18,5 @@
         android:id="@+id/itemthongtin"/>
     <item android:title="Đăng xuất:"
         android:id="@+id/itemdangxuat"/>
+
 </menu>

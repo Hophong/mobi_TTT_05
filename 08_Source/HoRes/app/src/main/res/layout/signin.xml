@@ -1,38 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/Layoutsignin"
-    android:layout_height="match_parent"
     android:layout_width="match_parent"
-    android:weightSum="10"
-    android:padding="3dp"
-    android:orientation="vertical"
+    android:layout_height="match_parent"
     android:background="@drawable/background3"
-    xmlns:android="http://schemas.android.com/apk/res/android">
+    android:orientation="vertical"
+    android:padding="3dp"
+    android:weightSum="10">
 
     <ImageView
         android:id="@+id/imageviewlogo"
-        android:layout_weight="4.6"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:src="@drawable/logo"
-        android:padding="3dp"/>
+        android:layout_weight="4.6"
+        android:padding="3dp"
+        android:src="@drawable/logo" />
 
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="0.5"
-        android:layout_marginTop="3dp">
-    </LinearLayout>
+        android:layout_marginTop="3dp"
+        android:layout_weight="0.5"></LinearLayout>
 
     <LinearLayout
         android:layout_width="300dp"
         android:layout_height="0dp"
-        android:layout_marginTop="3dp"
-        android:layout_weight="0.9"
-        android:layout_marginLeft="30dp"
-        android:layout_marginRight="30dp"
         android:layout_gravity="center"
+        android:layout_marginLeft="30dp"
+        android:layout_marginTop="3dp"
+        android:layout_marginRight="30dp"
+        android:layout_weight="0.9"
         android:background="@drawable/frame">
 
         <ImageView
@@ -55,30 +53,29 @@
     <LinearLayout
         android:layout_width="300dp"
         android:layout_height="0dp"
-        android:layout_weight="0.9"
+        android:layout_gravity="center"
+        android:layout_marginLeft="30dp"
         android:layout_marginTop="10dp"
         android:layout_marginRight="30dp"
-        android:layout_marginLeft="30dp"
-        android:layout_gravity="center"
+        android:layout_weight="0.9"
         android:background="@drawable/frame">
 
         <ImageView
             android:layout_width="40dp"
-            android:layout_marginLeft="20dp"
             android:layout_height="wrap_content"
-            android:src="@drawable/password"/>
+            android:layout_marginLeft="20dp"
+            android:src="@drawable/password" />
 
         <EditText
-            android:layout_marginLeft="7dp"
-            android:layout_marginRight="15dp"
             android:id="@+id/edtPassword"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Password"
-            android:textSize="20sp"
-            android:inputType="textPassword"
+            android:layout_marginLeft="7dp"
             android:layout_marginTop="0.2dp"
-            />
+            android:layout_marginRight="15dp"
+            android:hint="Password"
+            android:inputType="textPassword"
+            android:textSize="20sp" />
 
     </LinearLayout>
 
@@ -92,87 +89,65 @@
         android:background="@drawable/frame"
         android:text="SIGNIN"
         android:textSize="24sp"
-        android:textStyle="bold"
-        />
+        android:textStyle="bold" />
 
     <TextView
         android:id="@+id/tvFogotPass"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
         android:layout_weight="0.5"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:text="Forgot password?"
         android:gravity="center"
+        android:text="Forgot password?"
+        android:textColor="#ffffff"
         android:textSize="15sp"
-        android:textStyle="italic"
-        android:textColor="#ffffff"/>
+        android:textStyle="italic" />
 
-       <RelativeLayout
-        android:layout_weight="1.2"
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        >
+        android:layout_weight="1">
 
-        <!--<ImageView-->
-            <!--android:id="@+id/imageviewfb"-->
-            <!--android:layout_weight="1"-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="match_parent"-->
-            <!--android:src="@drawable/fb"-->
-            <!--android:layout_gravity="right"-->
-        <!--/>-->
-
-           <com.facebook.login.widget.LoginButton
-               android:id="@+id/login_facebook"
-               android:layout_width="wrap_content"
-               android:layout_height="wrap_content"
-               android:layout_centerHorizontal="true"
-               android:layout_marginTop="7dp" />
-
-           <ImageView
-               android:id="@+id/imageviewgmail"
-               android:layout_width="wrap_content"
-               android:layout_height="30dp"
-               android:layout_alignParentBottom="true"
-               android:layout_centerHorizontal="true"
-               android:layout_marginTop="7dp"
-               android:src="@drawable/gmail"
-               android:layout_below="@+id/login_facebook"/>
+        <com.facebook.login.widget.LoginButton
+            android:id="@+id/login_facebook"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:layout_marginTop="7dp" />
 
     </RelativeLayout>
 
     <RelativeLayout
-        android:layout_weight="0.5"
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:layout_weight="0.5"
         android:gravity="center">
 
         <TextView
             android:id="@+id/tvhaveAcount"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:text="Don't have an account yet?"
-            android:gravity="center"
-            android:textStyle="italic"
-            android:textSize="15sp"
             android:layout_marginLeft="35dp"
+            android:gravity="center"
+            android:text="Don't have an account yet?"
             android:textColor="#ffffff"
-           />
+            android:textSize="15sp"
+            android:textStyle="italic" />
 
         <TextView
             android:id="@+id/tvSignup"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:text="Sign up"
-            android:gravity="center"
-            android:textStyle="italic"
-            android:textSize="15sp"
-            android:layout_toRightOf="@+id/tvhaveAcount"
             android:layout_marginLeft="5dp"
             android:layout_marginRight="25dp"
-            android:textColor="#ffffff"/>
+            android:layout_toRightOf="@+id/tvhaveAcount"
+            android:gravity="center"
+            android:text="Sign up"
+            android:textColor="#ffffff"
+            android:textSize="15sp"
+            android:textStyle="italic" />
 
     </RelativeLayout>
-
 
 
 </LinearLayout>

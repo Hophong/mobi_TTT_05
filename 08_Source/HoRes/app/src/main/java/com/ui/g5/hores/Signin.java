@@ -44,6 +44,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -63,12 +64,20 @@ public class Signin extends Fragment {
     private static final String EMAIL = "email";
 
     // Login Facebook
-    private LoginButton loginFacebook;
     private CallbackManager callbackManager;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        AccessToken accessToken = AccessToken.getCurrentAccessToken();
+        boolean isLoggedIn = accessToken != null && !accessToken.isExpired();
+
+        if (isLoggedIn) {
+            Toast.makeText(getActivity(), "Logged in successfully", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(getActivity(), main_screen.class);
+            startActivity(intent);
+        }
+
         final Signup signup =(Signup)getFragmentManager().findFragmentById(R.id.Layoutsignup);
         view = inflater.inflate(R.layout.signin,container,false);
 
@@ -76,16 +85,20 @@ public class Signin extends Fragment {
 
         anhxa();
 
+        // Login Facebook
         callbackManager = CallbackManager.Factory.create();
 
-        loginFacebook = (LoginButton) view.findViewById(R.id.login_facebook);
-        loginFacebook.setReadPermissions(Arrays.asList(EMAIL));
+        LoginButton loginFacebook = (LoginButton) view.findViewById(R.id.login_facebook);
+        loginFacebook.setReadPermissions(Collections.singletonList(EMAIL));
+        loginFacebook.setFragment(this);
 
         loginFacebook.registerCallback(callbackManager,
                 new FacebookCallback<LoginResult>() {
                     @Override
                     public void onSuccess(LoginResult loginResult) {
                         Toast.makeText(getActivity(), "Successfully logged in", Toast.LENGTH_SHORT).show();
+                        Intent intent = new Intent(getActivity(), main_screen.class);
+                        startActivity(intent);
                     }
 
                     @Override
@@ -97,18 +110,8 @@ public class Signin extends Fragment {
                     public void onError(FacebookException exception) {
                         // App code
                         Toast.makeText(getActivity(), "onError", Toast.LENGTH_SHORT).show();
-
                     }
                 });
-
-        loginFacebook.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (AccessToken.getCurrentAccessToken() == null) {
-                    Toast.makeText(getActivity(), "Logged out", Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
 
        btnSignin.setOnClickListener(new View.OnClickListener() {
                @Override
@@ -125,11 +128,11 @@ public class Signin extends Fragment {
                    {
                        if(arrayUser.get(i).getUserName().equals(user) && arrayUser.get(i).getPassword().equals(pass))
                        {
-                           Toast.makeText(getActivity(), "dang nhap thanh cong", Toast.LENGTH_SHORT).show();
+                           Toast.makeText(getActivity(), "Logged in successfully", Toast.LENGTH_SHORT).show();
                            check=1;
                            Intent intent=new Intent(getActivity(),main_screen.class);
-                            intent.putExtra("username",user);
-                            String email=arrayUser.get(i).getEmail().toString();
+                           intent.putExtra("username",user);
+                           String email=arrayUser.get(i).getEmail().toString();
                            intent.putExtra("email",email);
                            startActivity(intent);
                        }
