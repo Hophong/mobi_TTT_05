@@ -7,6 +7,7 @@ import android.app.ProgressDialog;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.location.LocationManager;
@@ -25,7 +26,9 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
@@ -65,6 +68,7 @@ import org.osmdroid.views.overlay.Polyline;
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 
 public class main_screen extends AppCompatActivity implements MapEventsReceiver {
@@ -83,11 +87,10 @@ public class main_screen extends AppCompatActivity implements MapEventsReceiver 
     MyLocationNewOverlay myLocationNewOverlay;                                                      // Quan ly dinh vi
     FloatingActionButton location, floatBtn, btnTimkiem, btnChiduong, btnTimkiemxungquanh;
     Place myPlace;
-
     Place origin, destination;
-
     boolean HideFloatBtn = true;
     MapEventsOverlay mapEventsOverlay;                                                              // Xu ly khi touch vao man hinh ( add marker)
+    ArrayList<Place> historySearch = new ArrayList<Place>();;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -333,6 +336,7 @@ public class main_screen extends AppCompatActivity implements MapEventsReceiver 
 
     // Tim dia diem
     public void searchPlace() {
+
         // Không thể thao tác trên các edittext, button,... của layout khác nên sẽ tạo Dialog
         final Dialog dialogSeracch = new Dialog(this);
         dialogSeracch.setContentView(R.layout.search);
@@ -340,10 +344,18 @@ public class main_screen extends AppCompatActivity implements MapEventsReceiver 
         dialogSeracch.show();
 
         final AutoCompleteTextView autoCompleteTextView = (AutoCompleteTextView) dialogSeracch.findViewById(R.id.autoCompleteTextView);
-        final AutoCompleteAdapter adapter = new AutoCompleteAdapter(main_screen.this, R.layout.custom_item_autocompletetextview, R.id.autoCompleteItem);
+        final AutoCompleteAdapter adapter = new AutoCompleteAdapter(main_screen.this, R.layout.custom_item_autocompletetextview, R.id.autoCompleteItem,historySearch);
 
         autoCompleteTextView.setAdapter(adapter);                                                   // Thiết lập adapter cho autocomplete textview
         autoCompleteTextView.setThreshold(3);                                                       // Thiết lập số ký tự tối thiểu cho việc tìm kiếm
+        autoCompleteTextView.setOnTouchListener(new View.OnTouchListener() {                        // Show Drop Down
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                autoCompleteTextView.showDropDown();
+                return false;
+            }
+
+        });
 
         autoCompleteTextView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -366,12 +378,26 @@ public class main_screen extends AppCompatActivity implements MapEventsReceiver 
                 // Lay danh sach cac dia diem tim duoc
                 places = adapter.getArrayPlace();
 
-                // Lay ra dia diem duoc chon
-                Place temp = places.get(position);
+                Place temp;
+                if(places.size() != 0) {
+                    // Lay ra dia diem duoc chon
+                    temp = places.get(position);
+                }else{
+                    temp = historySearch.get(position);
+                }
+
+                // Luu vao history
+                if(historySearch.size() == 10) {
+                    historySearch.remove(0);
+                }
+                if(historySearch.contains(temp)) {
+                    historySearch.remove(temp);
+                }
+                historySearch.add(0, temp);
 
                 // Them marker, chinh camera
-                places.get(position).addMarker(map);
-                map.getController().setCenter(places.get(position).geoPoint);
+                temp.addMarker(map);
+                map.getController().setCenter(temp.geoPoint);
                 map.getController().setZoom(16);
 
             }
@@ -391,8 +417,8 @@ public class main_screen extends AppCompatActivity implements MapEventsReceiver 
         final AutoCompleteTextView startPlace = dialogRouting.findViewById(R.id.start);
         final AutoCompleteTextView endPlace = dialogRouting.findViewById(R.id.end);
 
-        final AutoCompleteAdapter adapterStart = new AutoCompleteAdapter(main_screen.this, R.layout.custom_item_autocompletetextview, R.id.autoCompleteItem);
-        final AutoCompleteAdapter adapterEnd = new AutoCompleteAdapter(main_screen.this, R.layout.custom_item_autocompletetextview, R.id.autoCompleteItem);
+        final AutoCompleteAdapter adapterStart = new AutoCompleteAdapter(main_screen.this, R.layout.custom_item_autocompletetextview, R.id.autoCompleteItem,historySearch);
+        final AutoCompleteAdapter adapterEnd = new AutoCompleteAdapter(main_screen.this, R.layout.custom_item_autocompletetextview, R.id.autoCompleteItem,historySearch);
 
         startPlace.setAdapter(adapterStart);
         endPlace.setAdapter(adapterEnd);
@@ -400,20 +426,63 @@ public class main_screen extends AppCompatActivity implements MapEventsReceiver 
         startPlace.setThreshold(3);
         endPlace.setThreshold(3);
 
+        startPlace.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                startPlace.showDropDown();
+                return false;
+            }
+        });
+        endPlace.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                endPlace.showDropDown();
+                return false;
+            }
+        });
+
 
         startPlace.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                origin = adapterStart.getArrayPlace().get(position);
-                startPlace.setText(adapterStart.getItem(position));
+                ArrayList<Place> placesStart = adapterStart.getArrayPlace();
+                if(placesStart.size() != 0) {
+                    origin = placesStart.get(position);
+                }else{
+                    origin = historySearch.get(position);
+                }
+                startPlace.setText(origin.getName() + ", " + origin.getStreet() + ", " + origin.getCity());
+
+                // Luu vao history
+                if(historySearch.size() == 10) {
+                    historySearch.remove(0);
+                }
+                if(historySearch.contains(origin)) {
+                    historySearch.remove(origin);
+                }
+                historySearch.add(0, origin);
             }
         });
 
         endPlace.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                destination = adapterEnd.getArrayPlace().get(position);
-                endPlace.setText(adapterEnd.getItem(position));
+                ArrayList<Place> placesEnd = adapterEnd.getArrayPlace();
+                if(placesEnd.size() != 0) {
+                    destination = placesEnd.get(position);
+                }else{
+                    destination = historySearch.get(position);
+                }
+                endPlace.setText(destination.getName() + ", " + destination.getStreet() + ", " + destination.getCity());
+
+                // Luu vao history
+                if(historySearch.size() == 10) {
+                    historySearch.remove(0);
+                }
+                if(historySearch.contains(destination)) {
+                    historySearch.remove(destination);
+                }
+                historySearch.add(0, destination);
             }
         });
 
@@ -495,7 +564,6 @@ public class main_screen extends AppCompatActivity implements MapEventsReceiver 
     public Place reverseGeocoding(GeoPoint geoPoint) {
         String spoint = Double.toString(geoPoint.getLatitude()) + "," + Double.toString(geoPoint.getLongitude());
         String url = urlReverseGeocoding + spoint + "&locale=" + locale + "&debug=true&key=" + KEY;
-        //String url = "http://photon.komoot.de/reverse?"+point;
         String jString = BonusPackHelper.requestStringFromUrl(url);
         Place place = null;
         try {
@@ -511,8 +579,11 @@ public class main_screen extends AppCompatActivity implements MapEventsReceiver 
             String name = jPlace.optString("name");
             String street = jPlace.optString("street");
             String city = jPlace.optString("city");
+            String country = jPlace.optString("country");
+            String osm_value = jPlace.optString("osm_value");
+            String houseNumber = jPlace.optString("housenumber");
 
-            place = new Place(point, name, street, city);
+            place = new Place(point, name, street, city, osm_value,country,houseNumber);
 
 
         } catch (JSONException e) {
@@ -591,14 +662,14 @@ public class main_screen extends AppCompatActivity implements MapEventsReceiver 
                         // Add Marker các địa điểm
                         for (POI poi : pois) {
                             Marker poiMarker = new Marker(map);
-                            poiMarker.setTitle(poi.mType);
+                            poiMarker.setTitle(poi.mType.toUpperCase());
                             poiMarker.setSnippet(poi.mDescription);
                             poiMarker.setPosition(poi.mLocation);
                             poiMarker.setIcon(finalPoiIcon);
-//                            if(poi.mThumbnail != null){
-//                                poiMarker.setImage(new BitmapDrawable(poi.mThumbnail));
-//                            }
-
+                            if(poi.mThumbnail != null){
+                                Bitmap b = Bitmap.createScaledBitmap(poi.mThumbnail,50,50,false);
+                                poiMarker.setImage(new BitmapDrawable(getResources(),b));
+                            }
                             poiMarkers.add(poiMarker);
                         }
                     }

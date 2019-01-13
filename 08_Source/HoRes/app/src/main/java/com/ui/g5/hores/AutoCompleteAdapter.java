@@ -24,6 +24,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class AutoCompleteAdapter extends ArrayAdapter<String> implements Filterable {
     ArrayList<String> data ;
@@ -40,6 +41,21 @@ public class AutoCompleteAdapter extends ArrayAdapter<String> implements Filtera
         super(context, resource, textViewResourceId);
         this.data = new ArrayList<>();
         arrayPlace = new ArrayList<Place>();
+    }
+
+    public AutoCompleteAdapter(@NonNull Context context, int resource, int textViewResourceId,ArrayList<Place> historySearch) {
+        super(context, resource, textViewResourceId);
+        arrayPlace = new ArrayList<Place>();
+        this.data = new ArrayList<>();
+
+        int historySize = historySearch.size();
+        if(historySize != 0){
+            for(int i = 0 ; i < historySearch.size() ; i++) {
+                Place temp = historySearch.get(i);
+                data.add(temp.getName() + ", " + temp.getStreet() + ", " + temp.getCity());
+            }
+        }
+
     }
 
     @Override
@@ -70,7 +86,7 @@ public class AutoCompleteAdapter extends ArrayAdapter<String> implements Filtera
                         data.clear();
                         for(int i=0; i < arrayPlace.size(); i++){
                             Place place = arrayPlace.get(i);
-                            String text = place.getName() + ", " + place.getStreet() + ", " + place.getCity();
+                            String text = place.getName() + ", " + place.getStreet() + ", " + place.getCity() ;
                             data.add(text);
                         }
 

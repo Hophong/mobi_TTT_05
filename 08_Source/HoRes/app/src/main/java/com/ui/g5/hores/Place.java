@@ -1,5 +1,7 @@
 package com.ui.g5.hores;
 
+import android.widget.Button;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -16,12 +18,49 @@ public class Place {
     String name;
     String street;
     String city;
+    String osm_value;
+    String country;
+    String houseNumber;
 
     public Place(GeoPoint geoPoint, String name, String street, String city) {
         this.geoPoint = geoPoint;
         this.name = name;
         this.street = street;
         this.city = city;
+    }
+
+    public Place(GeoPoint geoPoint, String name, String street, String city, String osm_value, String country, String houseNumber) {
+        this.geoPoint = geoPoint;
+        this.name = name;
+        this.street = street;
+        this.city = city;
+        this.osm_value = osm_value;
+        this.country = country;
+        this.houseNumber = houseNumber;
+    }
+
+    public String getOsm_value() {
+        return osm_value;
+    }
+
+    public void setOsm_value(String osm_value) {
+        this.osm_value = osm_value;
+    }
+
+    public String getCountry() {
+        return country;
+    }
+
+    public void setCountry(String country) {
+        this.country = country;
+    }
+
+    public String getHouseNumber() {
+        return houseNumber;
+    }
+
+    public void setHouseNumber(String houseNumber) {
+        this.houseNumber = houseNumber;
     }
 
     public GeoPoint getGeoPoint() {
@@ -92,5 +131,20 @@ public class Place {
         startMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
         map.getOverlays().add(startMarker);
         startMarker.setTitle(this.getName());
+
+        String content = this.getName();
+        if(houseNumber != null && !houseNumber.equals(""))
+            content += ", " + this.getHouseNumber();
+        if(street != null && !street.equals(""))
+            content += ", " + this.getStreet();
+        if(city != null && !city.equals(""))
+            content += ", " + this.getCity();
+        if(country != null && !country.equals(""))
+            content += ", " + this.getCountry();
+        if(osm_value != null && !osm_value.equals(""))
+            content += ", " + this.getOsm_value();
+
+        startMarker.setSnippet(content);
+
     }
 }
