@@ -1,7 +1,13 @@
 package com.ui.g5.hores;
 
+
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
+
+import android.app.Dialog;
+import android.content.Context;
+import android.support.v4.app.DialogFragment;
+
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -188,22 +194,45 @@ public class Place extends AppCompatActivity {
 
         startMarker.setSnippet(content);
         startMarker.setInfoWindow(new CustomInfoWindow(map));
+
     }
+
     static public class CustomInfoWindow extends MarkerInfoWindow {
+
+
+
         POI mSelectedPoi;
 
-        public CustomInfoWindow(org.osmdroid.views.MapView mapView) {
+        public CustomInfoWindow(final org.osmdroid.views.MapView mapView) {
             super(R.layout.custom_marker, mapView);
             Button btn = (Button) (mView.findViewById(R.id.bubble_moreinfo2));
             btn.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View view) {
-                    //String temp = getMarkerReference().getSnippet();
+                    showDialog(view);
+                }
+            });
+        }
+
+        void showDialog(View view){
+            Dialog dialog = new Dialog(view.getContext());
+            dialog.setTitle("MENU");
+            dialog.setContentView(R.layout.custom_node);
+            dialog.show();
+
+            Button btnLike = (Button)dialog.findViewById(R.id.btnThich);
+            Button btnViewComment = (Button)dialog.findViewById(R.id.btnViewComment);
+            Button btnComment = (Button)dialog.findViewById(R.id.btnComment);
+
+            btnLike.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
                     Place temp = new Place(getMarkerReference().getPosition(),getMarkerReference().getSnippet());
                     if(likedList.contains(temp)){
                         Toast.makeText(view.getContext(), "Đã có trong danh sách yêu thích " , Toast.LENGTH_LONG).show();
 
                     }else {
                         likedList.add(temp);
+
                         RequestQueue requestqueue = Volley.newRequestQueue(view.getContext());
                         StringRequest stringRequest=new StringRequest(Request.Method.POST, "https://nqphu1998.000webhostapp.com/insertplace.php",
                                 new Response.Listener<String>()
@@ -241,9 +270,27 @@ public class Place extends AppCompatActivity {
                             }
                         };
                         requestqueue.add(stringRequest);
+
+                        Toast.makeText(view.getContext(), "Đã thêm vào danh sách yêu thích " + likedList.size() , Toast.LENGTH_LONG).show();
+
                     }
                 }
             });
+
+            btnViewComment.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+
+                }
+            });
+
+            btnComment.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+
+                }
+            });
+
         }
 
         @Override
@@ -253,5 +300,9 @@ public class Place extends AppCompatActivity {
             Marker marker = (Marker) item;
             mSelectedPoi = (POI) marker.getRelatedObject();
         }
+
     }
+
+
+
 }
