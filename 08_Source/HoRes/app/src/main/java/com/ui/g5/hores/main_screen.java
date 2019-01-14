@@ -65,6 +65,7 @@ import org.osmdroid.views.overlay.FolderOverlay;
 import org.osmdroid.views.overlay.MapEventsOverlay;
 import org.osmdroid.views.overlay.Marker;
 import org.osmdroid.views.overlay.Polyline;
+import org.osmdroid.views.overlay.infowindow.MarkerInfoWindow;
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
 
 import java.util.ArrayList;
@@ -90,7 +91,8 @@ public class main_screen extends AppCompatActivity implements MapEventsReceiver 
     Place origin, destination;
     boolean HideFloatBtn = true;
     MapEventsOverlay mapEventsOverlay;                                                              // Xu ly khi touch vao man hinh ( add marker)
-    ArrayList<Place> historySearch = new ArrayList<Place>();;
+    static ArrayList<Place> historySearch = new ArrayList<Place>();                                 // Lịch sử tìm kiếm
+    static ArrayList<Place> likedList = new ArrayList<Place>();                                   // Danh sách yêu thích
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -219,6 +221,7 @@ public class main_screen extends AppCompatActivity implements MapEventsReceiver 
         });
         popupMenu.show();
     }
+
 
 
     // Siggle tap
@@ -666,10 +669,14 @@ public class main_screen extends AppCompatActivity implements MapEventsReceiver 
                             poiMarker.setSnippet(poi.mDescription);
                             poiMarker.setPosition(poi.mLocation);
                             poiMarker.setIcon(finalPoiIcon);
+                            poiMarker.setAnchor(Marker.ANCHOR_CENTER,Marker.ANCHOR_BOTTOM);
                             if(poi.mThumbnail != null){
                                 Bitmap b = Bitmap.createScaledBitmap(poi.mThumbnail,50,50,false);
                                 poiMarker.setImage(new BitmapDrawable(getResources(),b));
                             }
+
+                            poiMarker.setInfoWindow(new Place.CustomInfoWindow(map));
+                            poiMarker.setRelatedObject(poi);
                             poiMarkers.add(poiMarker);
                         }
                     }
