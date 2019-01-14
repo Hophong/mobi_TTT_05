@@ -1,16 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<LinearLayout
-    android:layout_height="match_parent"
+<android.support.v4.widget.DrawerLayout
+    android:id="@+id/mydrawer"
     android:layout_width="match_parent"
-    android:orientation="vertical"
+    android:layout_height="match_parent"
     xmlns:android="http://schemas.android.com/apk/res/android">
-
     <FrameLayout
         android:id="@+id/emptyLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
     </FrameLayout>
+    <ListView
+        android:id="@+id/menu"
+        android:layout_width="240dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        android:choiceMode="singleChoice"
+        android:background="#ffffff"
+        >
 
-</LinearLayout>
+    </ListView>
+</android.support.v4.widget.DrawerLayout>

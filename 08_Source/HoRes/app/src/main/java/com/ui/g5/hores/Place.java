@@ -1,9 +1,19 @@
 package com.ui.g5.hores;
 
+import android.support.v4.app.FragmentTransaction;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
+
+import com.android.volley.AuthFailureError;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -15,12 +25,14 @@ import org.osmdroid.views.overlay.Marker;
 import org.osmdroid.views.overlay.infowindow.MarkerInfoWindow;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import static com.ui.g5.hores.main_screen.likedList;
-
+import static com.ui.g5.hores.main_screen.user;
 // Lưu thông tin cần thiết của một địa điểm và các thao tác
+public class Place extends AppCompatActivity {
 
-public class Place {
     GeoPoint geoPoint;
     String name;
     String street;
@@ -177,7 +189,6 @@ public class Place {
         startMarker.setSnippet(content);
         startMarker.setInfoWindow(new CustomInfoWindow(map));
     }
-
     static public class CustomInfoWindow extends MarkerInfoWindow {
         POI mSelectedPoi;
 
@@ -193,7 +204,43 @@ public class Place {
 
                     }else {
                         likedList.add(temp);
-                        Toast.makeText(view.getContext(), "Đã thêm vào danh sách yêu thích " , Toast.LENGTH_LONG).show();
+                        RequestQueue requestqueue = Volley.newRequestQueue(view.getContext());
+                        StringRequest stringRequest=new StringRequest(Request.Method.POST, "https://nqphu1998.000webhostapp.com/insertplace.php",
+                                new Response.Listener<String>()
+                                {
+                                    @Override
+                                    public void onResponse(String response) {
+                                        if(response.trim().equals("success"))
+                                        {
+                                            Toast.makeText(getView().getContext(), "Đã thêm vào danh sách yêu thích " , Toast.LENGTH_LONG).show();
+                                        }
+                                        else Toast.makeText(getView().getContext(), "error", Toast.LENGTH_SHORT).show();
+                                    }
+                                },
+                                new Response.ErrorListener() {
+                                    @Override
+                                    public void onErrorResponse(VolleyError error) {
+                                        Toast.makeText(getView().getContext(), "error", Toast.LENGTH_SHORT).show();
+                                    }
+                                }
+                        ){
+                            @Override
+                            protected Map<String, String> getParams() throws AuthFailureError {
+                                Map<String,String> params=new HashMap<>();
+                                params.put("username",user);
+                                params.put("lat",String.valueOf(likedList.get(likedList.size()-1).geoPoint.getLatitude()));
+                                params.put("long",String.valueOf(likedList.get(likedList.size()-1).geoPoint.getLongitude()));
+                                params.put("name",likedList.get(likedList.size()-1).name);
+                                params.put("street",likedList.get(likedList.size()-1).street);
+                                params.put("city",likedList.get(likedList.size()-1).city);
+                                params.put("osm_value",likedList.get(likedList.size()-1).osm_value);
+                                params.put("country",likedList.get(likedList.size()-1).country);
+                                params.put("housenumber",likedList.get(likedList.size()-1).houseNumber);
+                                params.put("descriptions",likedList.get(likedList.size()-1).descriptions);
+                                return params;
+                            }
+                        };
+                        requestqueue.add(stringRequest);
                     }
                 }
             });

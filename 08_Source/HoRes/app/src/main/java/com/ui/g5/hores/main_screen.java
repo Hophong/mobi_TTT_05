@@ -76,8 +76,9 @@ public class main_screen extends AppCompatActivity implements MapEventsReceiver 
 
     ImageView btnmenu;
     String url_getdata = "https://nqphu1998.000webhostapp.com/getdata.php";
+    String url_getplace = "https://nqphu1998.000webhostapp.com/getdiadiem.php";
     ArrayList<User> arrayList;
-    String user = "", email = "";
+    static String user = "", email = "";
     org.osmdroid.views.MapView map = null;                                                          // Map
     String KEY = "87c22c26-36bd-468d-9223-61be31580373";                                            // Graphhooper : https://graphhopper.com/dashboard/#/documentation
     String locale = "vi_VI";                                                                        // Khu vực tìm kiếm ở Việt Nam
@@ -97,7 +98,7 @@ public class main_screen extends AppCompatActivity implements MapEventsReceiver 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        ReadPlace(url_getplace);
         // Sử dụng Mapview của osmdroid
         Context ctx = getApplicationContext();
         org.osmdroid.config.Configuration.getInstance().load(ctx, PreferenceManager.getDefaultSharedPreferences(ctx));
@@ -178,7 +179,37 @@ public class main_screen extends AppCompatActivity implements MapEventsReceiver 
         });
 
     }
+    public void ReadPlace(String url)
+    {
+        RequestQueue requestqueue=Volley.newRequestQueue(this);
 
+        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, url, null,
+                new Response.Listener<JSONArray>() {
+                    @Override
+                    public void onResponse(JSONArray response) {
+                        for(int i=0;i<response.length();i++)
+                        {
+                            try {
+                                JSONObject object =response.getJSONObject(i);
+                                if(user.equals(object.getString("UserName")))
+                                likedList.add(new Place(new GeoPoint(object.getInt("lat"),object.getInt("long")),object.getString("name"),
+                                        object.getString("street"),object.getString("city"),object.getString("osm_value"),object.getString("country"),
+                                        object.getString("housenumber")));
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Toast.makeText(main_screen.this, error.toString(), Toast.LENGTH_SHORT).show();
+                    }
+                }
+        );
+        requestqueue.add(jsonArrayRequest);
+    }
     private void ShowFloatingBtn() {
         btnTimkiem.show();
         btnChiduong.show();
