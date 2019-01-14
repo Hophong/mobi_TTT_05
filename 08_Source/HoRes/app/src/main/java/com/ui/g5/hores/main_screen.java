@@ -697,7 +697,7 @@ public class main_screen extends AppCompatActivity implements MapEventsReceiver 
         }
     }
 
-    private class routingAsync extends AsyncTask<Place, GeoPoint, Boolean> {
+    public class routingAsync extends AsyncTask<Place, GeoPoint, Boolean> {
 
         ProgressDialog dialog;
         Place sPlace;
