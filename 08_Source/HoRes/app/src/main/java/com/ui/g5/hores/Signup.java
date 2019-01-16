@@ -114,16 +114,16 @@ public class Signup extends Fragment{
         StringRequest stringRequest=new StringRequest(Request.Method.POST, url,
                 new Response.Listener<String>()
                 {
-                @Override
+                    @Override
                     public void onResponse(String response) {
-                    if(response.trim().equals("success"))
-                    {
-                        Toast.makeText(getActivity(), "success", Toast.LENGTH_SHORT).show();
-                        FragmentTransaction ft= getFragmentManager().beginTransaction();
-                        ft.replace(R.id.emptyLayout, new Signin());
-                        ft.commit();
-                    }
-                    else Toast.makeText(getActivity(), "error", Toast.LENGTH_SHORT).show();
+                        if(response.trim().equals("success"))
+                        {
+                            Toast.makeText(getActivity(), "success", Toast.LENGTH_SHORT).show();
+                            FragmentTransaction ft= getFragmentManager().beginTransaction();
+                            ft.replace(R.id.emptyLayout, new Signin());
+                            ft.commit();
+                        }
+                        else Toast.makeText(getActivity(), "error", Toast.LENGTH_SHORT).show();
                     }
                 },
                 new Response.ErrorListener() {

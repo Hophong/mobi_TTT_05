@@ -1,5 +1,9 @@
 package com.ui.g5.hores;
 
+
+import android.support.v4.app.FragmentTransaction;
+import android.support.v7.app.AppCompatActivity;
+
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -43,10 +47,10 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 import static com.ui.g5.hores.main_screen.likedList;
-
+import static com.ui.g5.hores.main_screen.user;
 // Lưu thông tin cần thiết của một địa điểm và các thao tác
+public class Place extends AppCompatActivity {
 
-public class Place {
     GeoPoint geoPoint;
     String name;
     String street;
