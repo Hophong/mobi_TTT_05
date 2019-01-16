@@ -47,7 +47,7 @@
         android:layout_marginRight="15dp"
         android:layout_marginTop="80dp"
         android:backgroundTint="#fdfde8"
-        android:src="@drawable/fb" />
+        android:src="@drawable/mylocation" />
 
     <include layout="@layout/floating_layout"/>
 
